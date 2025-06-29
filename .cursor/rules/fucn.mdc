@@ -1,0 +1,108 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+You are assisting in building a Laravel-based multi-tenant SaaS application. This is a production-level MVP for vendors, buyers, and admins. Do not break any part of the defined structure, functionality, or flow. Follow these rules strictly.
+
+🚨 MAIN ARCHITECTURE RULES
+1. The app must follow a **multi-tenant architecture** using **subdomains for vendors**.
+2. The database is **shared**, but all vendor/shop-related models must include a `shop_id` or `vendor_id` to scope data correctly.
+3. Subdomain-based tenant routing must be implemented using Laravel’s route domain logic.
+4. Laravel 11 is used. Keep structure modular and scalable.
+5. Follow REST API principles and use **resourceful controllers**.
+
+🔐 USER ROLES & AUTH FLOW
+- There are 3 user roles: `admin`, `vendor`, `buyer`.
+- Vendors and buyers must register and login via separate flows.
+- Vendors must **pay ₦1,000 membership fee** before they can upload products or activate shop.
+
+🎯 KEY SYSTEM MODULES TO FOLLOW (Do NOT Skip or Break Logic)
+
+✅ AUTH MODULE:
+- Register/Login for buyer and vendor (phone, email, password)
+- Role must be assigned correctly on registration
+- Vendors must go to a **membership payment page** after registration
+
+✅ MEMBERSHIP MODULE:
+- Vendors cannot create/upload products or access the full dashboard unless membership payment is confirmed
+- Membership fee is ₦1,000 — handled via Paystack or Flutterwave
+- Add `is_paid` or `membership_active` field on `users` or `shops`
+- Include webhook/callback logic to confirm payment
+
+✅ SHOP MODULE:
+- A vendor must complete shop setup (name, WhatsApp number, logo, video, description, BVN/NIN)
+- On completion and payment, vendor gets public subdomain: `shopname.domain.com`
+- All vendor actions must be scoped by their `shop_id`
+
+✅ PRODUCT MODULE:
+- Vendors can create products only after payment
+- Products can be physical or digital
+- Fields: title, description, price, type, image(s), downloadable file (if digital), is_resellable
+- Each product has a public page
+- Each product has an **"Order via WhatsApp" button** using this format:
+  `https://wa.me/{vendor_phone}?text=I'm%20interested%20in%20[ProductName]`
+
+✅ BUYER MODULE:
+- Buyers register with basic info (name, email, phone, password)
+- Buyers can browse vendors and products
+- Buyers can place orders via:
+   - WhatsApp (external link, no API)
+   - On-platform checkout (add address, phone, notes)
+- Orders must be viewable in buyer dashboard
+
+✅ ORDER MODULE:
+- Orders must store buyer ID, product ID, status, shipping info
+- Vendors must view incoming orders in dashboard
+
+✅ BADGE SYSTEM:
+- Badge Levels: Bronze, Silver, Gold, Top Vendor
+- Auto-update badge based on:
+   - Number of uploaded products
+   - Completed sales
+   - Number of positive reviews (if reviews are added)
+- Badge shows in vendor dashboard, public shop, and vendor directory
+
+✅ PUBLIC SHOP & SUBDOMAIN:
+- Each vendor has a public shop on their subdomain
+- Shop page shows: banner, logo, business video, products grid, badge, contact info
+- Each product is clickable, with detail view and WhatsApp order button
+
+✅ VENDOR DIRECTORY:
+- Public list of all vendors
+- Searchable, paginated
+- Shows: logo, badge, shop description, “View Shop” button
+
+✅ LEARNING CENTER:
+- Vendors can access a free library of business skills videos or PDFs
+- No login required, but shows completion status in dashboard
+- Courses managed by admin
+
+✅ ADMIN PANEL:
+- View and manage all users
+- View all payments and orders
+- Moderate products and vendors
+- Assign or edit badges
+- Upload courses for vendors
+
+🧱 NAMING & STRUCTURE CONVENTIONS:
+- Prefix API endpoints with `/api`
+- Use plural table names (e.g. `products`, `orders`)
+- Keep all tenant-vendor-related logic scoped by `shop_id`
+- Use policies or middleware for role-based access control
+- Respect RESTful naming (`store`, `index`, `update`, `destroy`, `show`)
+
+🚫 STRICTLY DO NOT:
+- Use WhatsApp API — only generate links
+- Skip payment check before allowing vendor dashboard features
+- Allow vendors to upload products before shop profile and payment are complete
+- Bypass subdomain routing
+- Mix buyer and vendor logic into one user flow — keep them separate
+- Break the badge logic (must be auto-evaluated)
+
+✅ FINAL OUTPUT MUST:
+- Preserve this functional flow end-to-end
+- Maintain multi-tenant structure
+- Follow Laravel coding standards
+- Keep UI layout minimal, modern, dark red and white themed
+

@@ -1,0 +1,69 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+You are helping me build a Laravel-based SaaS web application for vendors and shop owners. Follow these strict rules and architecture to generate backend, frontend (Blade + Tailwind), API routes, and controller logic. The app must support multi-tenancy via subdomains, allow vendors to sell physical and digital products, and use WhatsApp links (not WhatsApp API) for communication.
+
+🏗️ SYSTEM OVERVIEW:
+- Laravel 11 project
+- Multi-tenant with subdomains using shared database
+- Vendors must pay ₦1,000 membership fee before uploading products
+- Buyers can register, browse shops, and buy products
+- Vendors have dashboards to manage their shops
+- Every vendor has a public shop (via subdomain): `shopname.domain.com`
+- Buyers and vendors both register/login
+- Admin can manage all users, payments, and products
+
+🔐 USER ROLES:
+1. Admin
+2. Vendor (Shop Owner)
+3. Buyer
+
+📁 CORE MODULES:
+- Auth (register, login, logout)
+- Shop Management (vendor sets shop name, video, logo, description, WhatsApp number)
+- Product Management (title, description, image, file if digital, price, WhatsApp link)
+- Reseller System (generate reseller links and track sales)
+- Order System (users can place order through WhatsApp or on-site checkout)
+- Badge System (bronze, silver, gold, top vendor based on milestones)
+- Vendor Learning Portal (free training courses)
+- Public Vendor Directory
+- Vendor Public Page via Subdomain
+- WhatsApp ordering via `https://wa.me/{phone}?text=I want {product name}`
+
+📌 WHATSAPP ORDERING:
+- No WhatsApp API integration — only links
+- Product pages must show WhatsApp button with auto-filled product message
+
+🔌 PAYMENT:
+- Vendors must pay ₦1,000 membership (via Paystack or Flutterwave) to unlock dashboard
+- Store all payments in `payments` table
+- Use webhook/callback logic to confirm vendor access
+
+📂 MODELS REQUIRED:
+- User (vendor or buyer)
+- Shop (belongs to vendor)
+- Product (belongs to shop)
+- Order
+- ResellerLink
+- Badge
+- Course
+- Payment
+
+
+🎨 FRONTEND STACK:
+- Use Laravel Blade with Tailwind CSS for UI
+- Admin dashboard is separate from vendor/buyer dashboards
+- Vendor dashboard includes tabs for products, learning, shop setup, orders, reseller links, badge status
+
+⚙️ ADDITIONAL RULES:
+- Restrict product upload if vendor hasn’t paid membership
+- Protect vendor dashboard with middleware
+- Apply multi-tenant logic using shop subdomain (route group with `domain('{shop}.yourdomain.com')`)
+- Buyers must register to place orders
+- Store digital product uploads securely (public URL or temp link)
+
+💡 GOAL:
+Help me build this SaaS MVP in a clean, maintainable Laravel structure using these exact requirements. Don't assume external tools unless necessary. Ask if anything is unclear before continuing.
+

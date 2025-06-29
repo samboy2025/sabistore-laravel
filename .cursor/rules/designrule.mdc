@@ -1,0 +1,88 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+🎯 PROJECT OVERVIEW:
+You are designing a Laravel SaaS web application for vendors and digital product sellers. The design must be minimal, modern, and clean with high usability. The color palette must be based on DARK RED and WHITE, optionally including soft grayscale (#F8F9FA) and very light blacks (#222, #333) for contrast.
+
+🧱 GENERAL DESIGN DIRECTION:
+- Use a minimalist layout with plenty of white space
+- Base colors: 
+   - 🔴 Primary Accent: #B10020 (Dark Red)
+   - ⚪ Base Background: #FFFFFF (White)
+   - ⚫ Dark Text: #1E1E1E or #222
+   - 🩶 Subtle Gray: #F3F3F3 or #E8E8E8
+- Use subtle shadows for cards and components (realistic depth)
+- Border-radius: 12px for most cards and buttons
+- Transition effects: soft and smooth (200ms–300ms)
+- Use TailwindCSS-like structure if designing for web components
+
+🧭 LAYOUT STRUCTURE GUIDELINES:
+- Use a responsive grid layout for all pages (2-column or single-column with collapsible sidebar on mobile)
+- Sticky top navigation bar for dashboard
+- Fixed sidebar for vendor dashboard with simple icons and hover effects
+- Content area must be centered and clean
+- Use icons from Lucide or Heroicons set for consistency
+
+🧰 COMPONENT STYLES:
+- **Navbar**: white background, dark red logo or brand name, dark icons
+- **Buttons**:
+   - Primary: Dark red background with white text
+   - Secondary: White background, dark red border and text
+   - Hover: Slight elevation and darker shade
+- **Cards**:
+   - Soft white background
+   - Rounded corners
+   - Subtle drop shadows
+   - Use icon or image thumbnails on the left
+- **Forms**:
+   - Large inputs with bold labels
+   - Use floating labels or labels above inputs
+   - Focused state: dark red border glow
+- **Tables**:
+   - Borderless, clean rows with zebra stripes using soft gray
+   - Action icons to the right (edit, delete, etc.)
+
+🧩 DASHBOARD DESIGN RULES (Vendor & Admin):
+- Dashboard should include:
+   - Stats cards (white card, icon + big number)
+   - Table of products or users
+   - Sidebar with: Products, Orders, Learning Center, Resellers, Settings, Badge Status
+- Use minimal color blocks, no heavy backgrounds
+- Use iconography and data visualization sparingly (bar charts, pie charts)
+
+🎨 PUBLIC PAGES STYLE (Homepage, Directory, Product Page):
+- Homepage Hero Section:
+   - Bold headline (dark red)
+   - Subheading in dark gray
+   - CTA buttons in dark red and white
+- Vendor Directory:
+   - Vendor cards with logo, name, badge (top vendor), shop description
+   - Hover effect lifts card with shadow
+- Product Card:
+   - Image on top
+   - Title, price, “Order via WhatsApp” or “Buy Now”
+   - Use badge or trust indicator for vendor
+
+🖼 DESIGN FEELING:
+- Sleek, Realistic, Serious, Professional
+- Make vendors feel “proud” to have their shop there
+- Make buyers feel “safe” buying from here
+- Inspire confidence, with high usability
+
+📱 RESPONSIVENESS:
+- Mobile-first design with:
+   - Collapsible side menu
+   - Floating button for WhatsApp or Buy
+   - Grid layouts collapse into 1-column scroll
+
+🔮 DON’Ts:
+- No gradients
+- No neon colors
+- No overly animated components
+- Don’t use large blocks of dark red — use it as an accent
+
+✅ FINAL GOAL:
+Create a minimal, modern, fast, and beautiful SaaS UI for vendors and buyers in Nigeria. Emphasize speed, trust, and professionalism. Keep it clean, sleek, and emotionally premium.
+

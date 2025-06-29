@@ -1,0 +1,132 @@
+<?php
+
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminShopController;
+use App\Http\Controllers\Admin\AdminPaymentController;
+use App\Http\Controllers\Vendor\VendorDashboardController;
+use App\Http\Controllers\Vendor\ShopController;
+use App\Http\Controllers\Vendor\ProductController;
+use App\Http\Controllers\Vendor\OrderController as VendorOrderController;
+use App\Http\Controllers\Vendor\ResellerLinkController;
+use App\Http\Controllers\Buyer\BuyerDashboardController;
+use App\Http\Controllers\Buyer\OrderController as BuyerOrderController;
+use App\Http\Controllers\Public\HomeController;
+use App\Http\Controllers\Public\VendorDirectoryController;
+use App\Http\Controllers\Public\CourseController;
+use App\Http\Controllers\Public\ShopPageController;
+use App\Http\Controllers\Payment\MembershipPaymentController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Public Routes (Main Domain)
+|--------------------------------------------------------------------------
+*/
+
+// Homepage and public pages
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/vendors', [VendorDirectoryController::class, 'index'])->name('vendors.directory');
+Route::get('/vendors/{shop:slug}', [VendorDirectoryController::class, 'show'])->name('vendors.show');
+
+// Learning Center (Public)
+Route::prefix('courses')->name('courses.')->group(function () {
+    Route::get('/', [CourseController::class, 'index'])->name('index');
+    Route::get('/{course:slug}', [CourseController::class, 'show'])->name('show');
+});
+
+// Authentication Routes
+Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+Route::post('/register', [RegisteredUserController::class, 'store']);
+
+// Simple profile route (temporary)
+Route::middleware(['auth'])->get('/profile', function() {
+    return redirect()->route('home')->with('info', 'Profile functionality coming soon');
+})->name('profile.edit');
+
+/*
+|--------------------------------------------------------------------------
+| Protected Routes (Main Domain)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+    
+    // Membership Payment Routes
+    Route::prefix('membership')->name('membership.')->group(function () {
+        Route::get('/payment', [MembershipPaymentController::class, 'show'])->name('payment');
+        Route::post('/payment', [MembershipPaymentController::class, 'process'])->name('process');
+        Route::get('/callback', [MembershipPaymentController::class, 'callback'])->name('callback');
+    });
+
+    // Admin Routes
+    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        
+        Route::resource('users', AdminUserController::class);
+        Route::resource('shops', AdminShopController::class);
+        Route::resource('payments', AdminPaymentController::class);
+        
+        Route::post('/shops/{shop}/toggle-status', [AdminShopController::class, 'toggleStatus'])->name('shops.toggle-status');
+    });
+
+    // Vendor Routes
+    Route::middleware(['role:vendor', 'membership'])->prefix('vendor')->name('vendor.')->group(function () {
+        Route::get('/dashboard', [VendorDashboardController::class, 'index'])->name('dashboard');
+        
+        // Shop Management
+        Route::resource('shop', ShopController::class)->except(['index', 'show']);
+        Route::get('/shop/setup', [ShopController::class, 'setup'])->name('shop.setup');
+        Route::post('/shop/complete-setup', [ShopController::class, 'completeSetup'])->name('shop.complete-setup');
+        
+        // Product Management
+        Route::resource('products', ProductController::class);
+        
+        // Order Management
+        Route::resource('orders', VendorOrderController::class)->only(['index', 'show', 'update']);
+        Route::post('/orders/{order}/mark-shipped', [VendorOrderController::class, 'markShipped'])->name('orders.mark-shipped');
+        Route::post('/orders/{order}/mark-delivered', [VendorOrderController::class, 'markDelivered'])->name('orders.mark-delivered');
+        
+        // Reseller Links
+        Route::resource('reseller-links', ResellerLinkController::class);
+        
+        // Learning Center (Vendor Access)
+        Route::get('/learning', [CourseController::class, 'vendorIndex'])->name('learning.index');
+        Route::post('/learning/{course}/complete', [CourseController::class, 'markComplete'])->name('learning.complete');
+    });
+
+    // Buyer Routes
+    Route::middleware(['role:buyer'])->prefix('buyer')->name('buyer.')->group(function () {
+        Route::get('/dashboard', [BuyerDashboardController::class, 'index'])->name('dashboard');
+        Route::resource('orders', BuyerOrderController::class)->only(['index', 'show']);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Subdomain Routes (Vendor Shops)
+|--------------------------------------------------------------------------
+*/
+
+Route::domain('{shop}.'.env('APP_DOMAIN', 'localhost'))->middleware(['tenant'])->group(function () {
+    
+    // Shop Homepage
+    Route::get('/', [ShopPageController::class, 'index'])->name('shop.home');
+    
+    // Products
+    Route::get('/products', [ShopPageController::class, 'products'])->name('shop.products');
+    Route::get('/products/{product}', [ShopPageController::class, 'product'])->name('shop.product');
+    
+    // Reseller tracking
+    Route::get('/r/{code}', [ShopPageController::class, 'resellerRedirect'])->name('shop.reseller');
+    
+    // Order placement (if not using WhatsApp)
+    Route::post('/order/{product}', [ShopPageController::class, 'placeOrder'])->name('shop.place-order')->middleware('auth');
+    
+});
