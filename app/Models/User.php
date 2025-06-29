@@ -213,4 +213,89 @@ class User extends Authenticatable
     {
         return $this->wallet_balance >= $amount;
     }
+
+    /**
+     * Course enrollment relationships
+     */
+    public function courseEnrollments()
+    {
+        return $this->hasMany(CourseEnrollment::class);
+    }
+
+    /**
+     * Learning progress relationship
+     */
+    public function learningProgress()
+    {
+        return $this->hasMany(LearningProgress::class);
+    }
+
+    /**
+     * Certificates relationship
+     */
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
+    /**
+     * Vendors this user follows (for buyers)
+     */
+    public function followedVendors()
+    {
+        return $this->hasMany(VendorFollow::class, 'buyer_id');
+    }
+
+    /**
+     * Buyers following this user (for vendors)
+     */
+    public function followers()
+    {
+        return $this->hasMany(VendorFollow::class, 'vendor_id');
+    }
+
+    /**
+     * Check if user is enrolled in a course
+     */
+    public function isEnrolledInCourse($courseId)
+    {
+        return $this->courseEnrollments()->where('course_id', $courseId)->exists();
+    }
+
+    /**
+     * Enroll user in a course
+     */
+    public function enrollInCourse($courseId, $amount = 0, $paymentMethod = 'free')
+    {
+        return $this->courseEnrollments()->create([
+            'course_id' => $courseId,
+            'amount_paid' => $amount,
+            'payment_method' => $paymentMethod,
+            'enrolled_at' => now(),
+        ]);
+    }
+
+    /**
+     * Check if user follows a vendor
+     */
+    public function followsVendor($vendorId)
+    {
+        return $this->followedVendors()->where('vendor_id', $vendorId)->exists();
+    }
+
+    /**
+     * Follow a vendor
+     */
+    public function followVendor($vendorId)
+    {
+        return VendorFollow::follow($this->id, $vendorId);
+    }
+
+    /**
+     * Unfollow a vendor
+     */
+    public function unfollowVendor($vendorId)
+    {
+        return VendorFollow::unfollow($this->id, $vendorId);
+    }
 }

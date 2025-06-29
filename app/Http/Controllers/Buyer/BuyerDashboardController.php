@@ -6,6 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Shop;
+use App\Models\Course;
+use App\Models\CourseEnrollment;
+use App\Models\Certificate;
+use App\Models\VendorFollow;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -31,6 +36,14 @@ class BuyerDashboardController extends Controller
                 ->whereHas('product', fn($q) => $q->where('type', 'digital'))
                 ->where('payment_status', 'paid')
                 ->count(),
+            'wallet_balance' => $user->wallet_balance,
+            'enrolled_courses' => $user->courseEnrollments()->count(),
+            'completed_courses' => $user->courseEnrollments()->completed()->count(),
+            'certificates_earned' => $user->certificates()->count(),
+            'vendors_following' => $user->followedVendors()->count(),
+            'resale_earnings' => $user->walletTransactions()
+                ->where('type', 'commission')
+                ->sum('amount'),
         ];
 
         // Recent orders
@@ -68,6 +81,33 @@ class BuyerDashboardController extends Controller
             ->pluck('shop')
             ->filter();
 
+        // Recent course enrollments
+        $recentCourses = $user->courseEnrollments()
+            ->with(['course'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Recent certificates
+        $recentCertificates = $user->certificates()
+            ->with(['course'])
+            ->latest()
+            ->take(3)
+            ->get();
+
+        // Followed vendors
+        $followedVendors = $user->followedVendors()
+            ->with(['vendor', 'vendor.shop'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Recent wallet transactions
+        $recentTransactions = $user->walletTransactions()
+            ->latest()
+            ->take(10)
+            ->get();
+
         return view('buyer.dashboard', compact(
             'user',
             'stats',
@@ -75,7 +115,11 @@ class BuyerDashboardController extends Controller
             'digitalProducts',
             'recentlyViewed',
             'recommendedProducts',
-            'favoriteVendors'
+            'favoriteVendors',
+            'recentCourses',
+            'recentCertificates',
+            'followedVendors',
+            'recentTransactions'
         ));
     }
 
@@ -149,6 +193,113 @@ class BuyerDashboardController extends Controller
             storage_path('app/' . $order->product->file_path),
             $order->product->title . '.' . pathinfo($order->product->file_path, PATHINFO_EXTENSION)
         );
+    }
+
+    /**
+     * Show wallet management page
+     */
+    public function wallet(): View
+    {
+        $user = Auth::user();
+        $wallet = $user->getOrCreateWallet();
+
+        $transactions = $user->walletTransactions()
+            ->latest()
+            ->paginate(20);
+
+        $stats = [
+            'total_funded' => $user->walletTransactions()
+                ->where('type', 'funding')
+                ->sum('amount'),
+            'total_spent' => $user->walletTransactions()
+                ->where('type', 'purchase')
+                ->sum('amount'),
+            'total_earned' => $user->walletTransactions()
+                ->where('type', 'commission')
+                ->sum('amount'),
+        ];
+
+        return view('buyer.wallet', compact('wallet', 'transactions', 'stats'));
+    }
+
+    /**
+     * Show learning center
+     */
+    public function courses(): View
+    {
+        $user = Auth::user();
+
+        // Available courses
+        $availableCourses = Course::active()
+            ->whereNotIn('id', $user->courseEnrollments()->pluck('course_id'))
+            ->paginate(12, ['*'], 'available');
+
+        // Enrolled courses
+        $enrolledCourses = $user->courseEnrollments()
+            ->with(['course', 'course.lessons'])
+            ->latest()
+            ->paginate(12, ['*'], 'enrolled');
+
+        return view('buyer.courses', compact('availableCourses', 'enrolledCourses'));
+    }
+
+    /**
+     * Show resale earnings
+     */
+    public function resale(): View
+    {
+        $user = Auth::user();
+
+        $stats = [
+            'total_earnings' => $user->walletTransactions()
+                ->where('type', 'commission')
+                ->sum('amount'),
+            'this_month_earnings' => $user->walletTransactions()
+                ->where('type', 'commission')
+                ->whereMonth('created_at', now()->month)
+                ->sum('amount'),
+            'total_referrals' => $user->orders()
+                ->whereNotNull('reseller_link_id')
+                ->count(),
+        ];
+
+        $recentEarnings = $user->walletTransactions()
+            ->where('type', 'commission')
+            ->with(['relatedOrder', 'relatedOrder.product'])
+            ->latest()
+            ->paginate(15);
+
+        return view('buyer.resale', compact('stats', 'recentEarnings'));
+    }
+
+    /**
+     * Show followed vendors
+     */
+    public function following(): View
+    {
+        $user = Auth::user();
+
+        $followedVendors = $user->followedVendors()
+            ->with(['vendor', 'vendor.shop'])
+            ->latest()
+            ->paginate(15);
+
+        return view('buyer.following', compact('followedVendors'));
+    }
+
+    /**
+     * Show certificates
+     */
+    public function certificates(): View
+    {
+        $user = Auth::user();
+
+        $certificates = $user->certificates()
+            ->with(['course'])
+            ->latest()
+            ->paginate(12);
+
+        return view('buyer.certificates', compact('certificates'));
     }
 
     /**

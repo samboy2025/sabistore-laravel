@@ -19,6 +19,8 @@ class Course extends Model
         'thumbnail_path',
         'duration_minutes',
         'category',
+        'price',
+        'is_free',
         'order',
         'is_active',
         'is_featured',
@@ -27,6 +29,8 @@ class Course extends Model
     protected function casts(): array
     {
         return [
+            'price' => 'decimal:2',
+            'is_free' => 'boolean',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
         ];
@@ -90,6 +94,57 @@ class Course extends Model
     }
 
     /**
+     * Get the lessons for this course
+     */
+    public function lessons()
+    {
+        return $this->hasMany(CourseLesson::class)->ordered();
+    }
+
+    /**
+     * Get the enrollments for this course
+     */
+    public function enrollments()
+    {
+        return $this->hasMany(CourseEnrollment::class);
+    }
+
+    /**
+     * Get the certificates issued for this course
+     */
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
+    /**
+     * Check if user is enrolled in this course
+     */
+    public function isEnrolledByUser($userId)
+    {
+        return $this->enrollments()->where('user_id', $userId)->exists();
+    }
+
+    /**
+     * Get enrollment for specific user
+     */
+    public function enrollmentForUser($userId)
+    {
+        return $this->enrollments()->where('user_id', $userId)->first();
+    }
+
+    /**
+     * Get formatted price
+     */
+    public function getFormattedPriceAttribute()
+    {
+        if ($this->is_free) {
+            return 'Free';
+        }
+        return '₦' . number_format($this->price, 2);
+    }
+
+    /**
      * Get formatted duration
      */
     public function getFormattedDurationAttribute()
@@ -106,5 +161,21 @@ class Course extends Model
         }
 
         return $minutes . 'm';
+    }
+
+    /**
+     * Scope for free courses
+     */
+    public function scopeFree($query)
+    {
+        return $query->where('is_free', true);
+    }
+
+    /**
+     * Scope for paid courses
+     */
+    public function scopePaid($query)
+    {
+        return $query->where('is_free', false);
     }
 }
