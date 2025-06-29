@@ -159,9 +159,9 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/profile', [App\Http\Controllers\Vendor\ProfileController::class, 'update'])->name('profile.update');
 
         // Wallet Management
-        Route::get('/wallet', [App\Http\Controllers\Vendor\WalletController::class, 'index'])->name('wallet.index');
-        Route::post('/wallet/fund', [App\Http\Controllers\Vendor\WalletController::class, 'fund'])->name('wallet.fund');
-        Route::get('/wallet/callback', [App\Http\Controllers\Vendor\WalletController::class, 'callback'])->name('wallet.callback');
+        Route::get('/wallet', [App\Http\Controllers\Vendor\WalletController::class, 'index'])->name('vendor.wallet.index');
+        Route::post('/wallet/fund', [App\Http\Controllers\Vendor\WalletController::class, 'fund'])->name('vendor.wallet.fund');
+        Route::get('/wallet/callback', [App\Http\Controllers\Vendor\WalletController::class, 'callback'])->name('vendor.wallet.callback');
     });
 
     // Buyer Routes
