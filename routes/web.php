@@ -42,6 +42,10 @@ Route::prefix('courses')->name('courses.')->group(function () {
     Route::get('/{course:slug}', [CourseController::class, 'show'])->name('show');
 });
 
+// Certificate Verification (Public)
+Route::get('/certificates/verify/{certificateNumber}', [\App\Http\Controllers\Buyer\CertificateController::class, 'verify'])->name('certificates.verify');
+Route::get('/certificates/share/{certificate}', [\App\Http\Controllers\Buyer\CertificateController::class, 'share'])->name('certificates.share');
+
 // Authentication Routes
 Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
@@ -159,6 +163,33 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:buyer'])->prefix('buyer')->name('buyer.')->group(function () {
         Route::get('/dashboard', [BuyerDashboardController::class, 'index'])->name('dashboard');
         Route::resource('orders', BuyerOrderController::class)->only(['index', 'show']);
+
+        // Wallet Management
+        Route::get('/wallet', [BuyerDashboardController::class, 'wallet'])->name('wallet');
+        Route::get('/wallet/fund', [\App\Http\Controllers\Buyer\WalletController::class, 'fund'])->name('wallet.fund');
+        Route::post('/wallet/fund', [\App\Http\Controllers\Buyer\WalletController::class, 'processFunding'])->name('wallet.process-funding');
+        Route::get('/wallet/callback', [\App\Http\Controllers\Buyer\WalletController::class, 'callback'])->name('wallet.callback');
+        Route::get('/wallet/export', [\App\Http\Controllers\Buyer\WalletController::class, 'export'])->name('wallet.export');
+        Route::get('/wallet/transaction/{transaction}', [\App\Http\Controllers\Buyer\WalletController::class, 'transaction'])->name('wallet.transaction');
+
+        // Learning Center
+        Route::get('/courses', [BuyerDashboardController::class, 'courses'])->name('courses');
+        Route::get('/courses/{course}', [\App\Http\Controllers\Buyer\CourseController::class, 'show'])->name('courses.show');
+        Route::post('/courses/{course}/enroll', [\App\Http\Controllers\Buyer\CourseController::class, 'enroll'])->name('courses.enroll');
+        Route::get('/courses/{course}/lessons/{lesson}', [\App\Http\Controllers\Buyer\CourseController::class, 'lesson'])->name('courses.lesson');
+        Route::post('/courses/{course}/lessons/{lesson}/complete', [\App\Http\Controllers\Buyer\CourseController::class, 'completeLesson'])->name('courses.lesson.complete');
+        Route::post('/courses/{course}/lessons/{lesson}/watch-time', [\App\Http\Controllers\Buyer\CourseController::class, 'updateWatchTime'])->name('courses.lesson.watch-time');
+
+        // Resale Earnings
+        Route::get('/resale', [BuyerDashboardController::class, 'resale'])->name('resale');
+
+        // Following Vendors
+        Route::get('/following', [BuyerDashboardController::class, 'following'])->name('following');
+
+        // Certificates
+        Route::get('/certificates', [BuyerDashboardController::class, 'certificates'])->name('certificates');
+        Route::get('/certificates/{certificate}', [\App\Http\Controllers\Buyer\CertificateController::class, 'show'])->name('certificates.show');
+        Route::get('/certificates/{certificate}/download', [\App\Http\Controllers\Buyer\CertificateController::class, 'download'])->name('certificates.download');
     });
 });
 

@@ -11,22 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('courses', function (Blueprint $table) {
+        Schema::create('course_lessons', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('course_id')->constrained()->onDelete('cascade');
             $table->string('title');
-            $table->text('description');
-            $table->string('slug')->unique();
-            $table->enum('type', ['video', 'pdf', 'article'])->default('video');
+            $table->text('description')->nullable();
+            $table->string('slug');
+            $table->enum('type', ['video', 'pdf', 'article', 'quiz'])->default('video');
             $table->string('content_url')->nullable(); // YouTube URL or file path
-            $table->string('thumbnail_path')->nullable();
+            $table->text('content')->nullable(); // For article type lessons
             $table->integer('duration_minutes')->nullable(); // For videos
-            $table->string('category')->nullable();
-            $table->decimal('price', 10, 2)->default(0.00); // Course price
-            $table->boolean('is_free')->default(true); // Free or paid course
             $table->integer('order')->default(0);
             $table->boolean('is_active')->default(true);
-            $table->boolean('is_featured')->default(false);
+            $table->boolean('is_preview')->default(false); // Can be viewed without enrollment
             $table->timestamps();
+
+            $table->index(['course_id', 'order']);
+            $table->unique(['course_id', 'slug']);
         });
     }
 
@@ -35,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('courses');
+        Schema::dropIfExists('course_lessons');
     }
 };
