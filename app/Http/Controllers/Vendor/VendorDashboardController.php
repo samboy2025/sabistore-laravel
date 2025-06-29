@@ -94,6 +94,10 @@ class VendorDashboardController extends Controller
         // Recent activity feed
         $activityFeed = $this->getActivityFeed($shop);
 
+        // Pending commission summary
+        $commissionService = app(\App\Services\CommissionService::class);
+        $pendingCommissions = $commissionService->getPendingCommissionSummary($user);
+
         return view('vendor.dashboard', compact(
             'user',
             'shop',
@@ -105,7 +109,8 @@ class VendorDashboardController extends Controller
             'badgeProgress',
             'monthlyData',
             'topProducts',
-            'activityFeed'
+            'activityFeed',
+            'pendingCommissions'
         ));
     }
 

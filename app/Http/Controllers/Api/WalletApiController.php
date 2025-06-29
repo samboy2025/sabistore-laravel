@@ -151,10 +151,12 @@ class WalletApiController extends Controller
                         ->first();
 
                     if ($transaction) {
+                        $user = $transaction->user;
+
                         DB::transaction(function () use ($transaction, $data) {
                             // Get user wallet
                             $wallet = $transaction->user->getOrCreateWallet();
-                            
+
                             // Credit wallet
                             $wallet->credit(
                                 $transaction->amount,
@@ -171,9 +173,17 @@ class WalletApiController extends Controller
                             ]);
                         });
 
+                        // Process any pending commissions if user is a vendor
+                        $pendingCommissionsProcessed = [];
+                        if ($user->isVendor()) {
+                            $commissionService = app(\App\Services\CommissionService::class);
+                            $pendingCommissionsProcessed = $commissionService->processPendingCommissions($user);
+                        }
+
                         return response()->json([
                             'success' => true,
-                            'message' => 'Wallet funded successfully'
+                            'message' => 'Wallet funded successfully',
+                            'pending_commissions_processed' => $pendingCommissionsProcessed
                         ]);
                     }
                 }
