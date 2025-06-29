@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant' => \App\Http\Middleware\TenantMiddleware::class,
             'membership' => \App\Http\Middleware\MembershipMiddleware::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'track.login' => \App\Http\Middleware\TrackUserLogin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
