@@ -74,6 +74,31 @@
             </div>
         @endif
 
+        <!-- Pending Commissions Notice -->
+        @if(isset($pendingCommissions) && $pendingCommissions['count'] > 0)
+            <div class="mb-6 bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-orange-800">Pending Commission Payments</h3>
+                        <div class="mt-2 text-sm text-orange-700">
+                            <p>You have {{ $pendingCommissions['count'] }} pending commission payment(s) totaling ₦{{ number_format($pendingCommissions['total_amount'], 2) }}. Fund your wallet to process these automatically.</p>
+                        </div>
+                        <div class="mt-4">
+                            <a href="{{ route('vendor.wallet.index') }}"
+                               class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-orange-800 bg-orange-100 hover:bg-orange-200 transition-colors">
+                                Fund Wallet
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             <!-- Total Products -->
@@ -178,7 +203,7 @@
                     </div>
                 </div>
                 <div class="mt-4">
-                    <a href="{{ route('wallet.index') }}" 
+                    <a href="{{ route('vendor.wallet.index') }}"
                        class="inline-flex items-center text-sm font-medium text-white hover:text-green-100 transition-colors">
                         Manage Wallet
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,7 +236,7 @@
         <!-- Quick Actions -->
         <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-8">
             <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 <a href="{{ route('vendor.products.create') }}" 
                    class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                     <svg class="w-8 h-8 text-red-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,13 +284,31 @@
                     <span class="text-sm font-medium text-gray-900">Learning Center</span>
                 </a>
 
-                <a href="{{ route('vendor.followers') }}" 
+                <a href="{{ route('vendor.followers') }}"
                    class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                     <svg class="w-8 h-8 text-pink-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
                     <span class="text-sm font-medium text-gray-900">Followers</span>
                     <span class="text-xs text-gray-500 mt-1">{{ $stats['followers_count'] ?? 0 }} followers</span>
+                </a>
+
+                <a href="{{ route('vendor.wallet.index') }}"
+                   class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <svg class="w-8 h-8 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                    </svg>
+                    <span class="text-sm font-medium text-gray-900">Wallet</span>
+                    <span class="text-xs text-gray-500 mt-1">{{ $user->formatted_wallet_balance }}</span>
+                </a>
+
+                <a href="{{ route('vendor.profile.edit') }}"
+                   class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <svg class="w-8 h-8 text-orange-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span class="text-sm font-medium text-gray-900">Profile</span>
+                    <span class="text-xs text-gray-500 mt-1">Edit details</span>
                 </a>
             </div>
         </div>

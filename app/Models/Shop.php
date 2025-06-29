@@ -24,6 +24,12 @@ class Shop extends Model
         'is_active',
         'setup_completed',
         'social_links',
+        'facebook_handle',
+        'instagram_handle',
+        'twitter_handle',
+        'tiktok_handle',
+        'business_address',
+        'business_location',
     ];
 
     protected function casts(): array
@@ -122,5 +128,37 @@ class Shop extends Model
     public function scopeCompleted($query)
     {
         return $query->where('setup_completed', true);
+    }
+
+    /**
+     * Get Facebook URL
+     */
+    public function getFacebookUrlAttribute()
+    {
+        return $this->facebook_handle ? "https://facebook.com/{$this->facebook_handle}" : null;
+    }
+
+    /**
+     * Get Instagram URL
+     */
+    public function getInstagramUrlAttribute()
+    {
+        return $this->instagram_handle ? "https://instagram.com/{$this->instagram_handle}" : null;
+    }
+
+    /**
+     * Get Twitter URL
+     */
+    public function getTwitterUrlAttribute()
+    {
+        return $this->twitter_handle ? "https://twitter.com/{$this->twitter_handle}" : null;
+    }
+
+    /**
+     * Get TikTok URL
+     */
+    public function getTiktokUrlAttribute()
+    {
+        return $this->tiktok_handle ? "https://tiktok.com/@{$this->tiktok_handle}" : null;
     }
 }

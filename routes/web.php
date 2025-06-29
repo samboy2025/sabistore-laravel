@@ -153,6 +153,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/followers', function() {
             return app(\App\Http\Controllers\FollowController::class)->followers(auth()->user());
         })->name('followers');
+
+        // Profile Management
+        Route::get('/profile/edit', [App\Http\Controllers\Vendor\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [App\Http\Controllers\Vendor\ProfileController::class, 'update'])->name('profile.update');
+
+        // Wallet Management
+        Route::get('/wallet', [App\Http\Controllers\Vendor\WalletController::class, 'index'])->name('vendor.wallet.index');
+        Route::post('/wallet/fund', [App\Http\Controllers\Vendor\WalletController::class, 'fund'])->name('vendor.wallet.fund');
+        Route::get('/wallet/callback', [App\Http\Controllers\Vendor\WalletController::class, 'callback'])->name('vendor.wallet.callback');
     });
 
     // Buyer Routes

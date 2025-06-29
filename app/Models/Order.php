@@ -157,5 +157,11 @@ class Order extends Model
             'status' => 'delivered',
             'delivered_at' => now(),
         ]);
+
+        // Process reseller commission if applicable
+        if ($this->reseller_id && !$this->commission_paid && $this->reseller_commission > 0) {
+            $commissionService = app(\App\Services\CommissionService::class);
+            $commissionService->processResellerCommission($this);
+        }
     }
 }

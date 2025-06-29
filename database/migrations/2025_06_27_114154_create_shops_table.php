@@ -26,6 +26,15 @@ return new class extends Migration
             $table->boolean('is_active')->default(false);
             $table->boolean('setup_completed')->default(false);
             $table->json('social_links')->nullable();
+
+            // Enhanced profile fields
+            $table->string('facebook_handle')->nullable();
+            $table->string('instagram_handle')->nullable();
+            $table->string('twitter_handle')->nullable();
+            $table->string('tiktok_handle')->nullable();
+            $table->text('business_address')->nullable();
+            $table->string('business_location')->nullable();
+
             $table->timestamps();
         });
     }
