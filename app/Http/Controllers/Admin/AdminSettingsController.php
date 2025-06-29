@@ -3,40 +3,49 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class AdminSettingsController extends Controller
 {
     public function index(): View
     {
-        $settings = [
-            'site_name' => 'SabiStore',
-            'site_description' => 'Multi-tenant SaaS for vendors',
-            'membership_fee' => 1000,
-            'currency' => 'NGN',
-            'paystack_public_key' => env('PAYSTACK_PUBLIC_KEY'),
-            'flutterwave_public_key' => env('FLUTTERWAVE_PUBLIC_KEY'),
-            'whatsapp_support' => '+234',
-            'support_email' => 'support@sabistore.com'
-        ];
-
+        $settings = Setting::orderBy('group')->orderBy('order')->get()->groupBy('group');
         return view('admin.settings.index', compact('settings'));
     }
 
-    public function update(Request $request)
+    public function update(Request $request): RedirectResponse
     {
-        $request->validate([
-            'site_name' => 'required|string|max:255',
-            'site_description' => 'nullable|string|max:500',
-            'membership_fee' => 'required|numeric|min:0',
-            'whatsapp_support' => 'nullable|string|max:20',
-            'support_email' => 'nullable|email'
+        $validated = $request->validate([
+            'settings' => 'required|array',
+            'settings.*' => 'nullable|string',
         ]);
 
-        // In a real application, you would save these to a settings table
-        // For now, we will just redirect with success message
-        return redirect()->route('admin.settings')->with('success', 'Settings updated successfully');
+        foreach ($validated['settings'] as $key => $value) {
+            $setting = Setting::where('key', $key)->first();
+            if ($setting) {
+                $setting->setTypedValue($value);
+                $setting->save();
+            }
+        }
+
+        // Handle file uploads
+        foreach ($request->allFiles() as $key => $file) {
+            if (strpos($key, 'settings_') === 0) {
+                $settingKey = str_replace('settings_', '', $key);
+                $setting = Setting::where('key', $settingKey)->first();
+
+                if ($setting && $setting->type === 'file') {
+                    $path = $file->store('settings', 'public');
+                    $setting->value = $path;
+                    $setting->save();
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'Settings updated successfully.');
     }
 
     public function payments(): View

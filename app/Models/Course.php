@@ -66,6 +66,32 @@ class Course extends Model
     }
 
     /**
+     * Get course enrollments
+     */
+    public function enrollments()
+    {
+        return $this->hasMany(CourseEnrollment::class);
+    }
+
+    /**
+     * Get course certificates
+     */
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
+    /**
+     * Get enrolled users
+     */
+    public function enrolledUsers()
+    {
+        return $this->belongsToMany(User::class, 'course_enrollments')
+            ->withPivot(['status', 'progress_percentage', 'enrolled_at', 'completed_at'])
+            ->withTimestamps();
+    }
+
+    /**
      * Scope to order courses by their order field
      */
     public function scopeOrdered($query)

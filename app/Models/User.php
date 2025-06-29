@@ -179,6 +179,46 @@ class User extends Authenticatable
     }
 
     /**
+     * Get user's certificates
+     */
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
+    /**
+     * Get user's course enrollments
+     */
+    public function courseEnrollments()
+    {
+        return $this->hasMany(CourseEnrollment::class);
+    }
+
+    /**
+     * Get user's login history
+     */
+    public function loginHistory()
+    {
+        return $this->hasMany(UserLogin::class);
+    }
+
+    /**
+     * Get reseller commissions earned by this user
+     */
+    public function resellerCommissions()
+    {
+        return $this->hasMany(ResellerCommission::class, 'reseller_id');
+    }
+
+    /**
+     * Get commissions paid by this vendor
+     */
+    public function vendorCommissions()
+    {
+        return $this->hasMany(ResellerCommission::class, 'vendor_id');
+    }
+
+    /**
      * Get or create wallet for user
      */
     public function getOrCreateWallet()

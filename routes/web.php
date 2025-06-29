@@ -23,6 +23,10 @@ use App\Http\Controllers\Public\ShopPageController;
 use App\Http\Controllers\Payment\MembershipPaymentController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\Admin\AdminWalletController;
+use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminCertificateController;
+use App\Http\Controllers\Admin\AdminLoginMonitorController;
+use App\Http\Controllers\Admin\AdminTransactionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -61,7 +65,7 @@ Route::middleware(['auth'])->get('/profile', function() {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'track.login'])->group(function () {
     
     // Follow/Unfollow Routes
     Route::post('/vendors/{vendor}/follow', [FollowController::class, 'follow'])->name('vendors.follow');
@@ -95,6 +99,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('shops', AdminShopController::class);
         Route::resource('payments', AdminPaymentController::class);
         Route::resource('courses', AdminCourseController::class);
+        Route::resource('products', AdminProductController::class);
+        Route::resource('certificates', AdminCertificateController::class);
         
         // Settings routes
         Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings');
@@ -104,6 +110,18 @@ Route::middleware(['auth'])->group(function () {
         
         Route::post('/shops/{shop}/toggle-status', [AdminShopController::class, 'toggleStatus'])->name('shops.toggle-status');
 
+        // Product management routes
+        Route::post('/products/{product}/toggle-status', [AdminProductController::class, 'toggleStatus'])->name('products.toggle-status');
+        Route::post('/products/{product}/flag', [AdminProductController::class, 'flag'])->name('products.flag');
+        Route::post('/products/{product}/verify', [AdminProductController::class, 'verify'])->name('products.verify');
+
+        // Certificate management routes
+        Route::get('/certificates/templates', [AdminCertificateController::class, 'templates'])->name('certificates.templates');
+        Route::put('/certificates/templates', [AdminCertificateController::class, 'updateTemplates'])->name('certificates.update-templates');
+        Route::post('/certificates/{certificate}/revoke', [AdminCertificateController::class, 'revoke'])->name('certificates.revoke');
+        Route::post('/certificates/{certificate}/reactivate', [AdminCertificateController::class, 'reactivate'])->name('certificates.reactivate');
+        Route::get('/certificates/{certificate}/download', [AdminCertificateController::class, 'download'])->name('certificates.download');
+
         // Admin Wallet Management Routes
         Route::prefix('wallets')->name('wallets.')->group(function () {
             Route::get('/', [AdminWalletController::class, 'index'])->name('index');
@@ -112,6 +130,26 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/users/{user}/adjust', [AdminWalletController::class, 'adjust'])->name('adjust');
             Route::post('/bulk-adjust', [AdminWalletController::class, 'bulkAdjust'])->name('bulk-adjust');
             Route::get('/export', [AdminWalletController::class, 'export'])->name('export');
+        });
+
+        // Transaction monitoring routes
+        Route::prefix('transactions')->name('transactions.')->group(function () {
+            Route::get('/', [AdminTransactionController::class, 'index'])->name('index');
+            Route::get('/payments', [AdminTransactionController::class, 'payments'])->name('payments');
+            Route::get('/commissions', [AdminTransactionController::class, 'commissions'])->name('commissions');
+            Route::get('/{transaction}', [AdminTransactionController::class, 'show'])->name('show');
+            Route::get('/analytics/data', [AdminTransactionController::class, 'analytics'])->name('analytics');
+            Route::get('/export/csv', [AdminTransactionController::class, 'export'])->name('export');
+        });
+
+        // Login monitoring routes
+        Route::prefix('login-monitor')->name('login-monitor.')->group(function () {
+            Route::get('/', [AdminLoginMonitorController::class, 'index'])->name('index');
+            Route::get('/users/{user}', [AdminLoginMonitorController::class, 'show'])->name('show');
+            Route::post('/logins/{login}/mark-suspicious', [AdminLoginMonitorController::class, 'markSuspicious'])->name('mark-suspicious');
+            Route::post('/logins/{login}/remove-suspicious', [AdminLoginMonitorController::class, 'removeSuspicious'])->name('remove-suspicious');
+            Route::get('/analytics/data', [AdminLoginMonitorController::class, 'analytics'])->name('analytics');
+            Route::get('/export/csv', [AdminLoginMonitorController::class, 'export'])->name('export');
         });
     });
 
