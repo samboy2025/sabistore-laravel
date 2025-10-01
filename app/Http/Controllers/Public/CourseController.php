@@ -6,11 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\JsonResponse;
 
+/**
+ * Class CourseController
+ *
+ * Handles the public display of courses and the vendor-specific learning center.
+ *
+ * @package App\Http\Controllers\Public
+ */
 class CourseController extends Controller
 {
     /**
-     * Display the public learning center
+     * Display the public learning center with a list of available courses.
+     *
+     * @return View Returns the view for the public course listing.
      */
     public function index(): View
     {
@@ -30,7 +40,10 @@ class CourseController extends Controller
     }
 
     /**
-     * Display a specific course
+     * Display a specific course details page.
+     *
+     * @param Course $course The course to be displayed.
+     * @return View Returns the view for the specified course.
      */
     public function show(Course $course): View
     {
@@ -52,7 +65,9 @@ class CourseController extends Controller
     }
 
     /**
-     * Display vendor learning dashboard
+     * Display the learning dashboard for authenticated vendors.
+     *
+     * @return View Returns the view for the vendor learning center.
      */
     public function vendorIndex(): View
     {
@@ -75,9 +90,12 @@ class CourseController extends Controller
     }
 
     /**
-     * Mark course as complete for vendor
+     * Mark a course as complete for the authenticated vendor.
+     *
+     * @param Course $course The course to mark as complete.
+     * @return JsonResponse A JSON response indicating the success of the operation.
      */
-    public function markComplete(Course $course)
+    public function markComplete(Course $course): JsonResponse
     {
         $user = auth()->user();
         

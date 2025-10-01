@@ -4,7 +4,40 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Class UserLogin
+ *
+ * Represents a record of a user's login activity, including IP, location, and device information.
+ *
+ * @package App\Models
+ * @property int $id
+ * @property int $user_id The ID of the user who logged in.
+ * @property string|null $ip_address The IP address used for the login.
+ * @property string|null $user_agent The user agent string of the client.
+ * @property string|null $device_type The type of device (e.g., 'desktop', 'mobile').
+ * @property string|null $browser The browser used for the login.
+ * @property string|null $platform The operating system platform.
+ * @property string|null $country The country of the login origin.
+ * @property string|null $city The city of the login origin.
+ * @property string|null $region The region or state of the login origin.
+ * @property float|null $latitude The latitude of the login origin.
+ * @property float|null $longitude The longitude of the login origin.
+ * @property string|null $timezone The timezone of the login origin.
+ * @property bool $is_mobile Whether the login was from a mobile device.
+ * @property bool $is_suspicious Whether the login has been flagged as suspicious.
+ * @property \Illuminate\Support\Carbon $login_at Timestamp when the login occurred.
+ * @property \Illuminate\Support\Carbon|null $logout_at Timestamp when the logout occurred.
+ * @property int|null $session_duration The duration of the session in minutes.
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ *
+ * @property-read User $user The user who owns the login record.
+ * @property-read string $location A formatted string of the login location (City, Region, Country).
+ * @property-read string $device_info A formatted string of the device information (Browser on Platform).
+ */
 class UserLogin extends Model
 {
     use HasFactory;
@@ -29,6 +62,11 @@ class UserLogin extends Model
         'session_duration',
     ];
 
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
@@ -41,7 +79,14 @@ class UserLogin extends Model
         ];
     }
 
-    protected static function boot()
+    /**
+     * The "booted" method of the model.
+     *
+     * Automatically sets the login_at timestamp when a new record is created.
+     *
+     * @return void
+     */
+    protected static function boot(): void
     {
         parent::boot();
 
@@ -53,49 +98,68 @@ class UserLogin extends Model
     }
 
     /**
-     * Get the user that owns the login record
+     * Get the user that owns the login record.
+     *
+     * @return BelongsTo
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
     /**
-     * Scope to suspicious logins
+     * Scope a query to only include suspicious logins.
+     *
+     * @param Builder $query
+     * @return Builder
      */
-    public function scopeSuspicious($query)
+    public function scopeSuspicious(Builder $query): Builder
     {
         return $query->where('is_suspicious', true);
     }
 
     /**
-     * Scope to mobile logins
+     * Scope a query to only include logins from mobile devices.
+     *
+     * @param Builder $query
+     * @return Builder
      */
-    public function scopeMobile($query)
+    public function scopeMobile(Builder $query): Builder
     {
         return $query->where('is_mobile', true);
     }
 
     /**
-     * Scope to recent logins
+     * Scope a query to include logins within a recent number of days.
+     *
+     * @param Builder $query
+     * @param int $days The number of days to look back.
+     * @return Builder
      */
-    public function scopeRecent($query, $days = 30)
+    public function scopeRecent(Builder $query, int $days = 30): Builder
     {
         return $query->where('login_at', '>=', now()->subDays($days));
     }
 
     /**
-     * Scope by country
+     * Scope a query to filter logins by a specific country.
+     *
+     * @param Builder $query
+     * @param string $country The country to filter by.
+     * @return Builder
      */
-    public function scopeFromCountry($query, $country)
+    public function scopeFromCountry(Builder $query, string $country): Builder
     {
         return $query->where('country', $country);
     }
 
     /**
-     * Mark login as suspicious
+     * Mark this login record as suspicious.
+     *
+     * @param string|null $reason Optional reason for marking as suspicious (not currently stored).
+     * @return void
      */
-    public function markAsSuspicious($reason = null)
+    public function markAsSuspicious(string $reason = null): void
     {
         $this->update([
             'is_suspicious' => true,
@@ -103,9 +167,11 @@ class UserLogin extends Model
     }
 
     /**
-     * Record logout
+     * Record the logout time and calculate the session duration.
+     *
+     * @return void
      */
-    public function recordLogout()
+    public function recordLogout(): void
     {
         $logoutTime = now();
         $sessionDuration = $this->login_at->diffInMinutes($logoutTime);
@@ -117,7 +183,9 @@ class UserLogin extends Model
     }
 
     /**
-     * Get formatted location
+     * Get a formatted string of the login location.
+     *
+     * @return string
      */
     public function getLocationAttribute(): string
     {
@@ -126,7 +194,9 @@ class UserLogin extends Model
     }
 
     /**
-     * Get device info
+     * Get a formatted string of the device information.
+     *
+     * @return string
      */
     public function getDeviceInfoAttribute(): string
     {
@@ -135,7 +205,9 @@ class UserLogin extends Model
     }
 
     /**
-     * Check if login is from new location
+     * Check if this login is from a new location for the user.
+     *
+     * @return bool
      */
     public function isFromNewLocation(): bool
     {
@@ -146,7 +218,9 @@ class UserLogin extends Model
     }
 
     /**
-     * Check if login is from new device
+     * Check if this login is from a new device (based on user agent).
+     *
+     * @return bool
      */
     public function isFromNewDevice(): bool
     {

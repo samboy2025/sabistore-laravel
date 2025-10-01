@@ -10,9 +10,24 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Course;
 use Illuminate\View\View;
+use Illuminate\Support\Collection;
 
+/**
+ * Class AdminDashboardController
+ *
+ * Handles the display of the main admin dashboard and analytics pages.
+ *
+ * @package App\Http\Controllers\Admin
+ */
 class AdminDashboardController extends Controller
 {
+    /**
+     * Display the main admin dashboard.
+     *
+     * Gathers various statistics, recent activities, and revenue data to be displayed on the dashboard.
+     *
+     * @return View Returns the view for the admin dashboard.
+     */
     public function index(): View
     {
         // Get dashboard statistics
@@ -51,6 +66,13 @@ class AdminDashboardController extends Controller
         return view('admin.dashboard', compact('stats', 'recent_users', 'recent_payments', 'recent_shops', 'monthly_revenue'));
     }
 
+    /**
+     * Display the analytics page.
+     *
+     * Gathers advanced analytics data for display on the analytics page.
+     *
+     * @return View Returns the view for the analytics page.
+     */
     public function analytics(): View
     {
         // Advanced analytics data
@@ -65,7 +87,12 @@ class AdminDashboardController extends Controller
         return view('admin.analytics', compact('analytics'));
     }
 
-    private function getUserGrowthData()
+    /**
+     * Get user growth data for the last 12 months.
+     *
+     * @return array An array of user growth data, with each element containing the month and user count.
+     */
+    private function getUserGrowthData(): array
     {
         $growth = [];
         for ($i = 11; $i >= 0; $i--) {
@@ -82,7 +109,12 @@ class AdminDashboardController extends Controller
         return $growth;
     }
 
-    private function getRevenueBreakdown()
+    /**
+     * Get a breakdown of revenue by payment type.
+     *
+     * @return array An array containing the total revenue for memberships and products.
+     */
+    private function getRevenueBreakdown(): array
     {
         return [
             'membership' => Payment::where('type', 'membership')->where('status', 'success')->sum('amount'),
@@ -90,7 +122,12 @@ class AdminDashboardController extends Controller
         ];
     }
 
-    private function getTopVendors()
+    /**
+     * Get the top 10 vendors based on the number of orders.
+     *
+     * @return Collection A collection of the top vendors.
+     */
+    private function getTopVendors(): Collection
     {
         return Shop::withCount(['products', 'orders'])
             ->with('vendor', 'badge')
@@ -99,14 +136,26 @@ class AdminDashboardController extends Controller
             ->get();
     }
 
-    private function getProductCategories()
+    /**
+     * Get a count of products in each category (type).
+     *
+     * @return Collection A collection of product categories with their respective counts.
+     */
+    private function getProductCategories(): Collection
     {
         return Product::selectRaw('type, COUNT(*) as count')
             ->groupBy('type')
             ->get();
     }
 
-    private function getConversionRate()
+    /**
+     * Calculate the signup and conversion rates.
+     *
+     * Note: Total visitors are currently hardcoded and should be replaced with a real analytics source.
+     *
+     * @return array An array containing the signup and conversion rates.
+     */
+    private function getConversionRate(): array
     {
         $total_visitors = 1000; // This would come from analytics
         $total_signups = User::count();

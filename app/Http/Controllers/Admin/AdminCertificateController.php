@@ -11,11 +11,25 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Class AdminCertificateController
+ *
+ * Manages all certificate-related operations in the admin panel, including creation,
+ * viewing, updating, and deletion of certificates, as well as template management.
+ *
+ * @package App\Http\Controllers\Admin
+ */
 class AdminCertificateController extends Controller
 {
     /**
-     * Display a listing of certificates
+     * Display a listing of certificates.
+     *
+     * Retrieves and displays a paginated list of certificates, with filtering and search functionality.
+     *
+     * @param Request $request The request object containing filter and search parameters.
+     * @return View Returns the view with the list of certificates.
      */
     public function index(Request $request): View
     {
@@ -58,7 +72,9 @@ class AdminCertificateController extends Controller
     }
 
     /**
-     * Show the form for creating a new certificate
+     * Show the form for creating a new certificate.
+     *
+     * @return View Returns the view for creating a new certificate.
      */
     public function create(): View
     {
@@ -68,7 +84,13 @@ class AdminCertificateController extends Controller
     }
 
     /**
-     * Store a newly created certificate
+     * Store a newly created certificate in the database.
+     *
+     * Validates the request data, checks for course completion and existing certificates,
+     * then creates a new certificate and generates its PDF.
+     *
+     * @param Request $request The request object containing the certificate data.
+     * @return RedirectResponse Redirects to the certificate index with a success message or back with errors.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -112,7 +134,10 @@ class AdminCertificateController extends Controller
     }
 
     /**
-     * Display the specified certificate
+     * Display the specified certificate.
+     *
+     * @param Certificate $certificate The certificate to be displayed.
+     * @return View Returns the view with the certificate details.
      */
     public function show(Certificate $certificate): View
     {
@@ -121,7 +146,10 @@ class AdminCertificateController extends Controller
     }
 
     /**
-     * Show the form for editing the specified certificate
+     * Show the form for editing the specified certificate.
+     *
+     * @param Certificate $certificate The certificate to be edited.
+     * @return View Returns the view for editing the certificate.
      */
     public function edit(Certificate $certificate): View
     {
@@ -131,7 +159,14 @@ class AdminCertificateController extends Controller
     }
 
     /**
-     * Update the specified certificate
+     * Update the specified certificate in the database.
+     *
+     * Validates the request data and updates the certificate. If the template data is changed,
+     * it regenerates the certificate PDF.
+     *
+     * @param Request $request The request object containing the updated certificate data.
+     * @param Certificate $certificate The certificate to be updated.
+     * @return RedirectResponse Redirects to the certificate index with a success message.
      */
     public function update(Request $request, Certificate $certificate): RedirectResponse
     {
@@ -153,7 +188,12 @@ class AdminCertificateController extends Controller
     }
 
     /**
-     * Remove the specified certificate
+     * Remove the specified certificate from the database.
+     *
+     * Deletes the certificate and its associated PDF file from storage.
+     *
+     * @param Certificate $certificate The certificate to be deleted.
+     * @return RedirectResponse Redirects to the certificate index with a success message.
      */
     public function destroy(Certificate $certificate): RedirectResponse
     {
@@ -169,7 +209,12 @@ class AdminCertificateController extends Controller
     }
 
     /**
-     * Revoke certificate
+     * Revoke a certificate.
+     *
+     * Marks the certificate as inactive.
+     *
+     * @param Certificate $certificate The certificate to be revoked.
+     * @return RedirectResponse Redirects back with a success message.
      */
     public function revoke(Certificate $certificate): RedirectResponse
     {
@@ -180,7 +225,12 @@ class AdminCertificateController extends Controller
     }
 
     /**
-     * Reactivate certificate
+     * Reactivate a certificate.
+     *
+     * Marks the certificate as active.
+     *
+     * @param Certificate $certificate The certificate to be reactivated.
+     * @return RedirectResponse Redirects back with a success message.
      */
     public function reactivate(Certificate $certificate): RedirectResponse
     {
@@ -191,9 +241,12 @@ class AdminCertificateController extends Controller
     }
 
     /**
-     * Download certificate
+     * Download the certificate PDF.
+     *
+     * @param Certificate $certificate The certificate to be downloaded.
+     * @return StreamedResponse|RedirectResponse Returns the PDF file for download or redirects back with an error.
      */
-    public function download(Certificate $certificate)
+    public function download(Certificate $certificate): StreamedResponse|RedirectResponse
     {
         if (!$certificate->certificate_path || !Storage::disk('public')->exists($certificate->certificate_path)) {
             return redirect()->back()
@@ -205,7 +258,9 @@ class AdminCertificateController extends Controller
     }
 
     /**
-     * Show certificate templates management
+     * Show the certificate templates management page.
+     *
+     * @return View Returns the view for managing certificate templates.
      */
     public function templates(): View
     {
@@ -228,7 +283,12 @@ class AdminCertificateController extends Controller
     }
 
     /**
-     * Update certificate templates
+     * Update the certificate templates settings.
+     *
+     * Validates the request data and updates the certificate template settings, including uploading a new background image if provided.
+     *
+     * @param Request $request The request object containing the template settings.
+     * @return RedirectResponse Redirects back with a success message.
      */
     public function updateTemplates(Request $request): RedirectResponse
     {
@@ -264,9 +324,16 @@ class AdminCertificateController extends Controller
     }
 
     /**
-     * Generate certificate PDF (placeholder implementation)
+     * Generate a PDF for the certificate (placeholder implementation).
+     *
+     * This method is responsible for generating and saving the certificate PDF file.
+     * The current implementation is a placeholder and should be replaced with a proper
+     * PDF generation library (e.g., TCPDF, DomPDF, mPDF).
+     *
+     * @param Certificate $certificate The certificate for which to generate the PDF.
+     * @return void
      */
-    private function generateCertificatePDF(Certificate $certificate)
+    private function generateCertificatePDF(Certificate $certificate): void
     {
         // This is a placeholder - implement actual PDF generation using libraries like:
         // - TCPDF

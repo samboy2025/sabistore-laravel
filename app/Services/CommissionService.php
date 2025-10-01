@@ -8,10 +8,26 @@ use App\Models\WalletTransaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Class CommissionService
+ *
+ * Handles the logic for processing and managing reseller commissions.
+ * This includes paying out commissions, handling pending payments due to insufficient funds,
+ * and recalculating commissions.
+ *
+ * @package App\Services
+ */
 class CommissionService
 {
     /**
-     * Process reseller commission for a completed order
+     * Process the reseller commission for a completed order.
+     *
+     * This method checks if an order is eligible for commission, verifies the vendor's wallet balance,
+     * and then transfers the commission from the vendor's wallet to the reseller's wallet.
+     * If the vendor has insufficient funds, it creates a pending commission record.
+     *
+     * @param Order $order The order for which to process the commission.
+     * @return array An array containing the result of the operation (success status, message, etc.).
      */
     public function processResellerCommission(Order $order): array
     {
@@ -115,7 +131,13 @@ class CommissionService
     }
 
     /**
-     * Create pending commission record when vendor has insufficient balance
+     * Create pending wallet transaction records when a vendor has insufficient balance to pay a commission.
+     *
+     * @param Order $order The related order.
+     * @param User $vendor The vendor with insufficient funds.
+     * @param User $reseller The reseller who is owed the commission.
+     * @param float $commissionAmount The amount of the commission.
+     * @return void
      */
     private function createPendingCommissionRecord(Order $order, User $vendor, User $reseller, float $commissionAmount): void
     {
@@ -164,7 +186,13 @@ class CommissionService
     }
 
     /**
-     * Process all pending commissions for a vendor (called when wallet is funded)
+     * Process all pending commissions for a given vendor.
+     *
+     * This is typically called after a vendor has funded their wallet, allowing the system to
+     * attempt to pay out previously failed commission payments.
+     *
+     * @param User $vendor The vendor whose pending commissions should be processed.
+     * @return array A summary of the processing results.
      */
     public function processPendingCommissions(User $vendor): array
     {
@@ -210,7 +238,10 @@ class CommissionService
     }
 
     /**
-     * Calculate commission amount for an order
+     * Calculate the commission amount for a given order.
+     *
+     * @param Order $order The order to calculate the commission for.
+     * @return float The calculated commission amount.
      */
     public function calculateCommission(Order $order): float
     {
@@ -223,7 +254,10 @@ class CommissionService
     }
 
     /**
-     * Get pending commission summary for a vendor
+     * Get a summary of pending commissions for a specific vendor.
+     *
+     * @param User $vendor The vendor to get the summary for.
+     * @return array An array containing the count, total amount, and list of pending transactions.
      */
     public function getPendingCommissionSummary(User $vendor): array
     {

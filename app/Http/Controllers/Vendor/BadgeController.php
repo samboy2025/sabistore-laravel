@@ -5,13 +5,27 @@ namespace App\Http\Controllers\Vendor;
 use App\Http\Controllers\Controller;
 use App\Models\Badge;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
+/**
+ * Class BadgeController
+ *
+ * Manages the display of vendor badges and their progress towards earning new ones.
+ *
+ * @package App\Http\Controllers\Vendor
+ */
 class BadgeController extends Controller
 {
     /**
-     * Display vendor's badge status and progress
+     * Display the vendor's badge status and progress page.
+     *
+     * Calculates the vendor's current statistics (product count, order count, etc.),
+     * determines their current badge, the next achievable badge, and their progress towards it.
+     *
+     * @return View|RedirectResponse Returns the badge status view or redirects if the shop is not set up.
      */
-    public function index()
+    public function index(): View|RedirectResponse
     {
         $vendor = auth()->user();
         $shop = $vendor->shop;

@@ -9,10 +9,24 @@ use App\Models\UserLogin;
 use Illuminate\Support\Facades\Http;
 use Jenssegers\Agent\Agent;
 
+/**
+ * Class TrackUserLogin
+ *
+ * Middleware to track and record user login activity.
+ *
+ * @package App\Http\Middleware
+ */
 class TrackUserLogin
 {
     /**
      * Handle an incoming request.
+     *
+     * This middleware runs after the request has been handled and checks if a user is authenticated.
+     * If so, it calls the method to track the login activity.
+     *
+     * @param  \Illuminate\Http\Request  $request The incoming request.
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next The next middleware in the stack.
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -27,9 +41,16 @@ class TrackUserLogin
     }
 
     /**
-     * Track user login information
+     * Track and store user login information.
+     *
+     * Gathers details about the user's IP, device, and location, detects suspicious activity,
+     * and creates a `UserLogin` record in the database. It avoids creating duplicate records
+     * for the same session within a short time frame.
+     *
+     * @param Request $request The incoming request.
+     * @return void
      */
-    private function trackLogin(Request $request)
+    private function trackLogin(Request $request): void
     {
         $user = $request->user();
         $ipAddress = $request->ip();
@@ -77,7 +98,10 @@ class TrackUserLogin
     }
 
     /**
-     * Get device type from agent
+     * Get a standardized device type string from the Agent instance.
+     *
+     * @param Agent $agent The Jenssegers Agent instance.
+     * @return string The device type ('mobile', 'tablet', 'desktop', 'unknown').
      */
     private function getDeviceType(Agent $agent): string
     {
@@ -93,7 +117,10 @@ class TrackUserLogin
     }
 
     /**
-     * Get location data from IP address
+     * Get geolocation data from an IP address using an external service.
+     *
+     * @param string $ipAddress The IP address to geolocate.
+     * @return array An array of location data or an empty array on failure.
      */
     private function getLocationData(string $ipAddress): array
     {
@@ -129,7 +156,10 @@ class TrackUserLogin
     }
 
     /**
-     * Check if IP is private/local
+     * Check if the given IP address is in a private or reserved range.
+     *
+     * @param string $ip The IP address to check.
+     * @return bool True if the IP is private, false otherwise.
      */
     private function isPrivateIP(string $ip): bool
     {
@@ -137,7 +167,12 @@ class TrackUserLogin
     }
 
     /**
-     * Detect suspicious login activity
+     * Perform basic checks to detect potentially suspicious login activity.
+     *
+     * @param \App\Models\User $user The user who is logging in.
+     * @param string $ipAddress The IP address of the current login.
+     * @param array $locationData The location data for the current login.
+     * @return bool True if the activity is deemed suspicious, false otherwise.
      */
     private function detectSuspiciousActivity($user, string $ipAddress, array $locationData): bool
     {

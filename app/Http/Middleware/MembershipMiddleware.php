@@ -6,12 +6,25 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Class MembershipMiddleware
+ *
+ * Middleware to protect routes that require an active vendor membership.
+ *
+ * @package App\Http\Middleware
+ */
 class MembershipMiddleware
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * This middleware checks if the authenticated user is a vendor and has an active, paid membership.
+     * If the membership is inactive, expired, or unpaid, it redirects the user to the
+     * membership payment page.
+     *
+     * @param  \Illuminate\Http\Request  $request The incoming request.
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next The next middleware in the stack.
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next): Response
     {

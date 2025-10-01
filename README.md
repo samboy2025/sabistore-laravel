@@ -1,61 +1,99 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SabiStore - Multi-Tenant E-commerce & Reseller Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+SabiStore is a comprehensive, multi-tenant SaaS platform designed to empower vendors and entrepreneurs. It provides a robust ecosystem where vendors can create their own customizable online shops, manage products, handle orders, and engage with buyers. The platform integrates a complete wallet system, a reseller program with commission tracking, a learning center with courses and certifications, and a gamified badge system to reward vendor performance.
 
-## About Laravel
+## Key Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Multi-Tenancy:** Each vendor gets a unique, customizable shop accessible via a dedicated subdomain (e.g., `your-shop.sabistore.com`).
+- **Role-Based Access Control:** Distinct roles for Admins, Vendors, and Buyers, each with a tailored dashboard and permissions.
+- **Shop Management:** Vendors can customize their shop's appearance, manage products, and view detailed analytics.
+- **Product & Order Management:** Full support for physical and digital products, with a complete order tracking system from placement to delivery.
+- **Integrated Wallet System:** Users can fund their wallets via Paystack and make seamless purchases on the platform. Vendors receive earnings directly into their wallets.
+- **Reseller Program:** Users can become resellers for products, earning commissions on sales generated through their unique affiliate links.
+- **Learning Center:** A built-in LMS where admins can create courses. Vendors can enroll, track their progress, and earn certificates upon completion.
+- **Gamified Badge System:** Vendors are awarded badges (e.g., Bronze, Silver, Gold) based on their sales, number of products, and other performance metrics, encouraging engagement and building trust.
+- **Secure Payments:** Powered by Paystack for reliable and secure transaction processing for both wallet funding and direct payments.
+- **Admin Dashboard:** A central hub for platform management, including user administration, transaction monitoring, and site-wide settings.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Getting Started
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Follow these instructions to get a local copy of the project up and running for development and testing purposes.
 
-## Learning Laravel
+### Prerequisites
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP (>= 8.2)
+- Composer
+- Node.js & npm
+- A database server (e.g., MySQL, PostgreSQL)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Installation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-repo/sabistore.git
+    cd sabistore
+    ```
 
-## Laravel Sponsors
+2.  **Install PHP dependencies:**
+    ```bash
+    composer install
+    ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+3.  **Install JavaScript dependencies:**
+    ```bash
+    npm install
+    ```
 
-### Premium Partners
+4.  **Create your environment file:**
+    ```bash
+    cp .env.example .env
+    ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+5.  **Generate an application key:**
+    ```bash
+    php artisan key:generate
+    ```
 
-## Contributing
+6.  **Configure your `.env` file:**
+    Update the following variables with your local environment details:
+    - `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
+    - `PAYSTACK_PUBLIC_KEY`, `PAYSTACK_SECRET_KEY`
+    - `APP_URL` (e.g., `http://localhost:8000`)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+7.  **Run database migrations and seed the database:**
+    The seeder will create sample users, shops, products, and other necessary data.
+    ```bash
+    php artisan migrate --seed
+    ```
 
-## Code of Conduct
+8.  **Compile frontend assets:**
+    ```bash
+    npm run dev
+    ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+9.  **Serve the application:**
+    ```bash
+    php artisan serve
+    ```
+    The application will be available at `http://localhost:8000`.
 
-## Security Vulnerabilities
+### Development Helper Command
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+For testing purposes, you may need to quickly activate vendor memberships. A command has been created to facilitate this:
+
+```bash
+php artisan fix:vendor-dashboard
+```
+This command activates the membership for all vendors and patches a controller file to prevent type errors, making it easier to access vendor-specific features during development.
+
+## Running Tests
+
+To run the application's test suite, use the following Artisan command:
+
+```bash
+php artisan test
+```
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The SabiStore platform is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

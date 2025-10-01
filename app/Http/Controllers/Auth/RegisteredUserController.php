@@ -13,10 +13,19 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
+/**
+ * Class RegisteredUserController
+ *
+ * Handles the registration process for new users.
+ *
+ * @package App\Http\Controllers\Auth
+ */
 class RegisteredUserController extends Controller
 {
     /**
      * Display the registration view.
+     *
+     * @return View Returns the registration page view.
      */
     public function create(): View
     {
@@ -26,6 +35,10 @@ class RegisteredUserController extends Controller
     /**
      * Handle an incoming registration request.
      *
+     * Validates the registration data, creates a new user, logs them in, and redirects them based on their role.
+     *
+     * @param Request $request The request object containing registration data.
+     * @return RedirectResponse Redirects the user to the appropriate page after registration.
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
@@ -60,7 +73,10 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Redirect users after successful registration based on their role
+     * Redirect users after successful registration based on their role.
+     *
+     * @param User $user The newly registered user.
+     * @return RedirectResponse The appropriate redirect response based on the user's role.
      */
     private function redirectAfterRegistration(User $user): RedirectResponse
     {
