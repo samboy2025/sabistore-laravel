@@ -15,10 +15,27 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * Class WalletApiController
+ *
+ * Handles all API-based wallet operations, including fetching wallet data, funding,
+ * processing payments, and handling reseller links.
+ *
+ * @package App\Http\Controllers\Api
+ */
 class WalletApiController extends Controller
 {
+    /**
+     * The Paystack secret key for API authentication.
+     * @var string
+     */
     private $paystackSecretKey;
 
+    /**
+     * WalletApiController constructor.
+     *
+     * Sets up middleware and initializes the Paystack secret key.
+     */
     public function __construct()
     {
         $this->middleware('auth:sanctum');
@@ -26,7 +43,9 @@ class WalletApiController extends Controller
     }
 
     /**
-     * Get wallet balance and recent transactions
+     * Get the authenticated user's wallet balance and recent transactions.
+     *
+     * @return JsonResponse A JSON response containing the wallet balance and a list of recent transactions.
      */
     public function getWallet(): JsonResponse
     {
@@ -60,7 +79,12 @@ class WalletApiController extends Controller
     }
 
     /**
-     * Initiate wallet funding via Paystack
+     * Initiate wallet funding via Paystack.
+     *
+     * Creates a Paystack transaction and returns an authorization URL for the user to complete the payment.
+     *
+     * @param Request $request The request object containing the amount to fund.
+     * @return JsonResponse A JSON response with the Paystack authorization URL.
      */
     public function fundWallet(Request $request): JsonResponse
     {
@@ -126,7 +150,12 @@ class WalletApiController extends Controller
     }
 
     /**
-     * Handle Paystack webhook for wallet funding
+     * Handle the Paystack callback after a wallet funding attempt.
+     *
+     * Verifies the transaction with Paystack and updates the user's wallet if the payment was successful.
+     *
+     * @param Request $request The request object containing the transaction reference.
+     * @return JsonResponse A JSON response indicating the outcome of the transaction.
      */
     public function walletFundingCallback(Request $request): JsonResponse
     {
@@ -204,7 +233,14 @@ class WalletApiController extends Controller
     }
 
     /**
-     * Buy product with wallet
+     * Purchase a product using the wallet balance.
+     *
+     * Handles the entire purchase process, including debiting the buyer, crediting the vendor,
+     * and handling reseller commissions.
+     *
+     * @param Request $request The request object containing purchase details like quantity.
+     * @param Product $product The product being purchased.
+     * @return JsonResponse A JSON response indicating the outcome of the purchase.
      */
     public function buyProduct(Request $request, Product $product): JsonResponse
     {
@@ -321,7 +357,14 @@ class WalletApiController extends Controller
     }
 
     /**
-     * Track reseller link click and set session
+     * Track a reseller link click and set a session cookie.
+     *
+     * Records a click on the reseller link and stores the reseller code in the user's session
+     * to attribute a future purchase.
+     *
+     * @param Request $request The incoming request.
+     * @param string $code The unique code of the reseller link.
+     * @return JsonResponse A JSON response with the product URL to redirect the user to.
      */
     public function trackResellerLink(Request $request, $code): JsonResponse
     {

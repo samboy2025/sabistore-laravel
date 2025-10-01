@@ -7,12 +7,25 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Class TenantMiddleware
+ *
+ * Handles identifying and setting the current tenant (shop) based on the request's subdomain.
+ *
+ * @package App\Http\Middleware
+ */
 class TenantMiddleware
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * This middleware inspects the host for a subdomain. If a valid, active shop corresponds
+     * to the subdomain, it sets that shop as a global instance ('current_shop') and adds it
+     * to the request attributes for easy access within the application.
+     *
+     * @param  \Illuminate\Http\Request  $request The incoming request.
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next The next middleware in the stack.
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -39,7 +52,10 @@ class TenantMiddleware
     }
 
     /**
-     * Extract subdomain from host
+     * Extract the subdomain from the given host.
+     *
+     * @param string $host The full host from the request (e.g., "my-shop.sabistore.com").
+     * @return string|null The extracted subdomain (e.g., "my-shop") or null if not found.
      */
     private function getSubdomain(string $host): ?string
     {

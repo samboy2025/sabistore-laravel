@@ -8,11 +8,21 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Models\User;
 
+/**
+ * Class AuthenticatedSessionController
+ *
+ * Handles user authentication sessions, including login and logout.
+ *
+ * @package App\Http\Controllers\Auth
+ */
 class AuthenticatedSessionController extends Controller
 {
     /**
      * Display the login view.
+     *
+     * @return View Returns the login page view.
      */
     public function create(): View
     {
@@ -21,6 +31,11 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Handle an incoming authentication request.
+     *
+     * Authenticates the user, regenerates the session, and redirects them based on their role.
+     *
+     * @param LoginRequest $request The request object containing login credentials.
+     * @return RedirectResponse Redirects the user to their respective dashboard.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
@@ -35,7 +50,12 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Destroy an authenticated session.
+     * Destroy an authenticated session (logout).
+     *
+     * Logs the user out, invalidates their session, and regenerates the CSRF token.
+     *
+     * @param Request $request The incoming request.
+     * @return RedirectResponse Redirects the user to the homepage.
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -49,9 +69,12 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Redirect users after successful login based on their role
+     * Redirect users after a successful login based on their role.
+     *
+     * @param User $user The authenticated user.
+     * @return RedirectResponse The appropriate redirect response based on the user's role.
      */
-    private function redirectAfterLogin($user): RedirectResponse
+    private function redirectAfterLogin(User $user): RedirectResponse
     {
         switch ($user->role) {
             case 'admin':

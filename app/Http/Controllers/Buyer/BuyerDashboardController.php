@@ -9,11 +9,24 @@ use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Database\Eloquent\Collection;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
+/**
+ * Class BuyerDashboardController
+ *
+ * Manages the buyer's dashboard and related functionalities like viewing orders and downloading products.
+ *
+ * @package App\Http\Controllers\Buyer
+ */
 class BuyerDashboardController extends Controller
 {
     /**
-     * Display the buyer dashboard
+     * Display the buyer's main dashboard.
+     *
+     * Gathers various statistics, recent orders, and product recommendations for the buyer.
+     *
+     * @return View Returns the view for the buyer's dashboard.
      */
     public function index(): View
     {
@@ -80,7 +93,9 @@ class BuyerDashboardController extends Controller
     }
 
     /**
-     * Show order history
+     * Show the buyer's order history.
+     *
+     * @return View Returns a paginated view of the buyer's orders.
      */
     public function orders(): View
     {
@@ -95,7 +110,9 @@ class BuyerDashboardController extends Controller
     }
 
     /**
-     * Show digital downloads
+     * Show the buyer's available digital downloads.
+     *
+     * @return View Returns a paginated view of purchased digital products.
      */
     public function downloads(): View
     {
@@ -114,9 +131,14 @@ class BuyerDashboardController extends Controller
     }
 
     /**
-     * Download a digital product
+     * Download a purchased digital product.
+     *
+     * Verifies ownership and serves the file for download.
+     *
+     * @param Order $order The order associated with the digital product.
+     * @return BinaryFileResponse|void Returns the file for download or aborts on failure.
      */
-    public function downloadProduct(Order $order)
+    public function downloadProduct(Order $order): BinaryFileResponse
     {
         $user = Auth::user();
 
@@ -152,9 +174,12 @@ class BuyerDashboardController extends Controller
     }
 
     /**
-     * Get recommended products based on user's order history
+     * Get recommended products for the user based on their order history.
+     *
+     * @param \App\Models\User $user The user for whom to get recommendations.
+     * @return Collection A collection of recommended products.
      */
-    private function getRecommendedProducts($user): \Illuminate\Database\Eloquent\Collection
+    private function getRecommendedProducts(\App\Models\User $user): Collection
     {
         // Get product types the user has ordered
         $orderedTypes = $user->orders()

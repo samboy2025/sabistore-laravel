@@ -11,12 +11,34 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 
+/**
+ * Class MembershipPaymentController
+ *
+ * Handles the membership payment process for vendors using Paystack.
+ *
+ * @package App\Http\Controllers\Payment
+ */
 class MembershipPaymentController extends Controller
 {
+    /**
+     * The Paystack secret key.
+     * @var string
+     */
     private $paystackSecretKey;
+
+    /**
+     * The Paystack public key.
+     * @var string
+     */
     private $paystackPublicKey;
 
+    /**
+     * MembershipPaymentController constructor.
+     *
+     * Initializes Paystack API keys. Note: Keys are currently hardcoded for testing purposes.
+     */
     public function __construct()
     {
         // Temporarily hardcode working test keys to bypass .env issues
@@ -25,7 +47,9 @@ class MembershipPaymentController extends Controller
     }
 
     /**
-     * Show the membership payment page
+     * Show the membership payment page.
+     *
+     * @return View|RedirectResponse Returns the payment view or redirects if membership is already active.
      */
     public function show(): View|RedirectResponse
     {
@@ -47,7 +71,12 @@ class MembershipPaymentController extends Controller
     }
 
     /**
-     * Process the membership payment
+     * Process the membership payment request.
+     *
+     * Initializes a transaction with Paystack and redirects the user to the payment gateway.
+     *
+     * @param Request $request The request object containing payment details.
+     * @return RedirectResponse Redirects to the Paystack payment page or back with an error.
      */
     public function process(Request $request): RedirectResponse
     {
@@ -142,7 +171,12 @@ class MembershipPaymentController extends Controller
     }
 
     /**
-     * Handle Paystack callback
+     * Handle the callback from Paystack after payment.
+     *
+     * Verifies the payment status and updates the user's membership if successful.
+     *
+     * @param Request $request The request object containing the payment reference.
+     * @return RedirectResponse Redirects to the vendor dashboard on success or back to payment page on failure.
      */
     public function callback(Request $request): RedirectResponse
     {
@@ -192,9 +226,14 @@ class MembershipPaymentController extends Controller
     }
 
     /**
-     * Handle Paystack webhooks (for additional security)
+     * Handle incoming webhooks from Paystack.
+     *
+     * Provides an additional layer of verification for payment success.
+     *
+     * @param Request $request The request object containing the webhook payload.
+     * @return Response Returns a 200 OK response to acknowledge receipt of the webhook.
      */
-    public function webhook(Request $request)
+    public function webhook(Request $request): Response
     {
         // Verify webhook signature
         $signature = $request->header('x-paystack-signature');

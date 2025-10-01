@@ -7,10 +7,19 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
+/**
+ * Class OrderController
+ *
+ * Handles the display of a buyer's orders.
+ *
+ * @package App\Http\Controllers\Buyer
+ */
 class OrderController extends Controller
 {
     /**
-     * Display a listing of the buyer's orders
+     * Display a listing of the buyer's orders.
+     *
+     * @return View Returns a paginated view of the buyer's orders.
      */
     public function index(): View
     {
@@ -23,7 +32,12 @@ class OrderController extends Controller
     }
 
     /**
-     * Display the specified order
+     * Display the specified order.
+     *
+     * Ensures that the authenticated user is the owner of the order before displaying it.
+     *
+     * @param Order $order The order to be displayed.
+     * @return View Returns the view with the details of the specified order.
      */
     public function show(Order $order): View
     {

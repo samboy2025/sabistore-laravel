@@ -6,15 +6,31 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 
+/**
+ * Class WalletController
+ *
+ * Handles the user's wallet functionality, including displaying the wallet dashboard and initiating funding.
+ *
+ * @package App\Http\Controllers
+ */
 class WalletController extends Controller
 {
+    /**
+     * WalletController constructor.
+     *
+     * Ensures that the user is authenticated before they can access any wallet-related pages.
+     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
     /**
-     * Display the wallet dashboard
+     * Display the wallet dashboard.
+     *
+     * Retrieves and displays the user's wallet information, recent transactions, and summary statistics.
+     *
+     * @return View Returns the view for the wallet dashboard.
      */
     public function index(): View
     {
@@ -49,7 +65,12 @@ class WalletController extends Controller
     }
 
     /**
-     * Initiate wallet funding
+     * Initiate wallet funding.
+     *
+     * Validates the funding amount and redirects the user to the payment gateway to complete the transaction.
+     *
+     * @param Request $request The request object containing the funding amount.
+     * @return RedirectResponse Redirects the user to the payment gateway.
      */
     public function fund(Request $request): RedirectResponse
     {

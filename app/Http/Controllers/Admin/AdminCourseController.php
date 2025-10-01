@@ -6,10 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 
+/**
+ * Class AdminCourseController
+ *
+ * Manages the administration of courses, including creation, editing, and deletion.
+ *
+ * @package App\Http\Controllers\Admin
+ */
 class AdminCourseController extends Controller
 {
+    /**
+     * Display a listing of the courses.
+     *
+     * Retrieves and displays a paginated list of courses, with filtering and search functionality.
+     *
+     * @param Request $request The request object for filtering and searching.
+     * @return View Returns the view with the list of courses.
+     */
     public function index(Request $request): View
     {
         $query = Course::query();
@@ -34,12 +50,25 @@ class AdminCourseController extends Controller
         return view('admin.courses.index', compact('courses'));
     }
 
+    /**
+     * Show the form for creating a new course.
+     *
+     * @return View Returns the view for creating a new course.
+     */
     public function create(): View
     {
         return view('admin.courses.create');
     }
 
-    public function store(Request $request)
+    /**
+     * Store a newly created course in storage.
+     *
+     * Validates the request data, handles file uploads, and creates a new course.
+     *
+     * @param Request $request The request object containing the course data.
+     * @return RedirectResponse Redirects to the course index with a success message.
+     */
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'title' => 'required|string|max:255',
@@ -92,17 +121,38 @@ class AdminCourseController extends Controller
         return redirect()->route('admin.courses.index')->with('success', 'Course created successfully');
     }
 
+    /**
+     * Display the specified course.
+     *
+     * @param Course $course The course to be displayed.
+     * @return View Returns the view with the course details.
+     */
     public function show(Course $course): View
     {
         return view('admin.courses.show', compact('course'));
     }
 
+    /**
+     * Show the form for editing the specified course.
+     *
+     * @param Course $course The course to be edited.
+     * @return View Returns the view for editing the course.
+     */
     public function edit(Course $course): View
     {
         return view('admin.courses.edit', compact('course'));
     }
 
-    public function update(Request $request, Course $course)
+    /**
+     * Update the specified course in storage.
+     *
+     * Validates the request data, handles file uploads, and updates the existing course.
+     *
+     * @param Request $request The request object containing the updated course data.
+     * @param Course $course The course to be updated.
+     * @return RedirectResponse Redirects to the course index with a success message.
+     */
+    public function update(Request $request, Course $course): RedirectResponse
     {
         $request->validate([
             'title' => 'required|string|max:255',
@@ -155,7 +205,13 @@ class AdminCourseController extends Controller
         return redirect()->route('admin.courses.index')->with('success', 'Course updated successfully');
     }
 
-    public function destroy(Course $course)
+    /**
+     * Remove the specified course from storage.
+     *
+     * @param Course $course The course to be deleted.
+     * @return RedirectResponse Redirects to the course index with a success message.
+     */
+    public function destroy(Course $course): RedirectResponse
     {
         $course->delete();
         return redirect()->route('admin.courses.index')->with('success', 'Course deleted successfully');

@@ -9,11 +9,24 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Class AdminLoginMonitorController
+ *
+ * Manages the monitoring and analysis of user login activities from the admin panel.
+ *
+ * @package App\Http\Controllers\Admin
+ */
 class AdminLoginMonitorController extends Controller
 {
     /**
-     * Display login monitoring dashboard
+     * Display the login monitoring dashboard.
+     *
+     * Retrieves and displays a paginated list of login records with filtering and search capabilities.
+     *
+     * @param Request $request The request object containing filter and search parameters.
+     * @return View Returns the view for the login monitoring dashboard.
      */
     public function index(Request $request): View
     {
@@ -80,7 +93,10 @@ class AdminLoginMonitorController extends Controller
     }
 
     /**
-     * Show detailed login information for a user
+     * Show detailed login information for a specific user.
+     *
+     * @param User $user The user whose login details are to be displayed.
+     * @return View Returns the view with the user's login history and statistics.
      */
     public function show(User $user): View
     {
@@ -111,7 +127,10 @@ class AdminLoginMonitorController extends Controller
     }
 
     /**
-     * Mark login as suspicious
+     * Mark a login record as suspicious.
+     *
+     * @param UserLogin $login The login record to be marked.
+     * @return JsonResponse Returns a JSON response indicating success.
      */
     public function markSuspicious(UserLogin $login): JsonResponse
     {
@@ -124,7 +143,10 @@ class AdminLoginMonitorController extends Controller
     }
 
     /**
-     * Remove suspicious flag from login
+     * Remove the suspicious flag from a login record.
+     *
+     * @param UserLogin $login The login record to be updated.
+     * @return JsonResponse Returns a JSON response indicating success.
      */
     public function removeSuspicious(UserLogin $login): JsonResponse
     {
@@ -137,7 +159,9 @@ class AdminLoginMonitorController extends Controller
     }
 
     /**
-     * Get login analytics data
+     * Get login analytics data for charts and reports.
+     *
+     * @return JsonResponse Returns a JSON response containing various login analytics.
      */
     public function analytics(): JsonResponse
     {
@@ -200,9 +224,14 @@ class AdminLoginMonitorController extends Controller
     }
 
     /**
-     * Export login data
+     * Export login data to a CSV file.
+     *
+     * Applies the same filters as the index page to export a filtered list of login records.
+     *
+     * @param Request $request The request object containing filter parameters.
+     * @return StreamedResponse Returns a streamed response to download the CSV file.
      */
-    public function export(Request $request)
+    public function export(Request $request): StreamedResponse
     {
         $query = UserLogin::with('user');
 

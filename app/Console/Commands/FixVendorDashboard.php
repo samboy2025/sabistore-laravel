@@ -4,7 +4,16 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 
+/**
+ * Class FixVendorDashboard
+ *
+ * A console command designed for testing and development environments to quickly resolve
+ * common issues preventing access to the vendor dashboard.
+ *
+ * @package App\Console\Commands
+ */
 class FixVendorDashboard extends Command
 {
     /**
@@ -19,12 +28,19 @@ class FixVendorDashboard extends Command
      *
      * @var string
      */
-    protected $description = 'Fix vendor dashboard issues for testing';
+    protected $description = 'Fix vendor dashboard issues for testing by activating memberships and patching controller return types.';
 
     /**
      * Execute the console command.
+     *
+     * This command performs two main actions for testing purposes:
+     * 1. It activates the membership for all users with the 'vendor' role.
+     * 2. It patches the `VendorDashboardController` to include `RedirectResponse` in the `index`
+     *    method's return type hint, preventing potential type errors during development.
+     *
+     * @return int Returns 0 on success.
      */
-    public function handle()
+    public function handle(): int
     {
         // Activate all vendor memberships for testing
         $vendors = User::where('role', 'vendor')->get();

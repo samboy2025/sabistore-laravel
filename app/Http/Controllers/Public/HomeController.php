@@ -10,10 +10,23 @@ use App\Models\Badge;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
+/**
+ * Class HomeController
+ *
+ * Handles the display of the main homepage, gathering all necessary data
+ * for featured vendors, latest products, platform statistics, and more.
+ *
+ * @package App\Http\Controllers\Public
+ */
 class HomeController extends Controller
 {
     /**
-     * Display the homepage
+     * Display the application's homepage.
+     *
+     * Gathers data for featured vendors, latest products, platform statistics,
+     * featured courses, and top vendors to be displayed on the welcome page.
+     *
+     * @return View Returns the view for the homepage.
      */
     public function index(): View
     {
