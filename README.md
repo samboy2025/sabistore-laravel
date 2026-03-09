@@ -2,6 +2,10 @@
 
 SabiStore is a comprehensive, multi-tenant SaaS platform designed to empower vendors and entrepreneurs. It provides a robust ecosystem where vendors can create their own customizable online shops, manage products, handle orders, and engage with buyers. The platform integrates a complete wallet system, a reseller program with commission tracking, a learning center with courses and certifications, and a gamified badge system to reward vendor performance.
 
+## Screenshot
+
+![SabiStore Homepage](public/images/screenshot.png)
+
 ## Key Features
 
 - **Multi-Tenancy:** Each vendor gets a unique, customizable shop accessible via a dedicated subdomain (e.g., `your-shop.sabistore.com`).
