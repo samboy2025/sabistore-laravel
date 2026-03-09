@@ -6,27 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Shop;
+use App\Models\Course;
+use App\Models\CourseEnrollment;
+use App\Models\Certificate;
+use App\Models\VendorFollow;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
-use Illuminate\Database\Eloquent\Collection;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-/**
- * Class BuyerDashboardController
- *
- * Manages the buyer's dashboard and related functionalities like viewing orders and downloading products.
- *
- * @package App\Http\Controllers\Buyer
- */
 class BuyerDashboardController extends Controller
 {
     /**
-     * Display the buyer's main dashboard.
-     *
-     * Gathers various statistics, recent orders, and product recommendations for the buyer.
-     *
-     * @return View Returns the view for the buyer's dashboard.
+     * Display the buyer dashboard
      */
     public function index(): View
     {
@@ -44,6 +36,14 @@ class BuyerDashboardController extends Controller
                 ->whereHas('product', fn($q) => $q->where('type', 'digital'))
                 ->where('payment_status', 'paid')
                 ->count(),
+            'wallet_balance' => $user->wallet_balance,
+            'enrolled_courses' => $user->courseEnrollments()->count(),
+            'completed_courses' => $user->courseEnrollments()->completed()->count(),
+            'certificates_earned' => $user->certificates()->count(),
+            'vendors_following' => $user->followedVendors()->count(),
+            'resale_earnings' => $user->walletTransactions()
+                ->where('type', 'commission')
+                ->sum('amount'),
         ];
 
         // Recent orders
@@ -81,6 +81,33 @@ class BuyerDashboardController extends Controller
             ->pluck('shop')
             ->filter();
 
+        // Recent course enrollments
+        $recentCourses = $user->courseEnrollments()
+            ->with(['course'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Recent certificates
+        $recentCertificates = $user->certificates()
+            ->with(['course'])
+            ->latest()
+            ->take(3)
+            ->get();
+
+        // Followed vendors
+        $followedVendors = $user->followedVendors()
+            ->with(['vendor', 'vendor.shop'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Recent wallet transactions
+        $recentTransactions = $user->walletTransactions()
+            ->latest()
+            ->take(10)
+            ->get();
+
         return view('buyer.dashboard', compact(
             'user',
             'stats',
@@ -88,14 +115,16 @@ class BuyerDashboardController extends Controller
             'digitalProducts',
             'recentlyViewed',
             'recommendedProducts',
-            'favoriteVendors'
+            'favoriteVendors',
+            'recentCourses',
+            'recentCertificates',
+            'followedVendors',
+            'recentTransactions'
         ));
     }
 
     /**
-     * Show the buyer's order history.
-     *
-     * @return View Returns a paginated view of the buyer's orders.
+     * Show order history
      */
     public function orders(): View
     {
@@ -110,9 +139,7 @@ class BuyerDashboardController extends Controller
     }
 
     /**
-     * Show the buyer's available digital downloads.
-     *
-     * @return View Returns a paginated view of purchased digital products.
+     * Show digital downloads
      */
     public function downloads(): View
     {
@@ -131,14 +158,9 @@ class BuyerDashboardController extends Controller
     }
 
     /**
-     * Download a purchased digital product.
-     *
-     * Verifies ownership and serves the file for download.
-     *
-     * @param Order $order The order associated with the digital product.
-     * @return BinaryFileResponse|void Returns the file for download or aborts on failure.
+     * Download a digital product
      */
-    public function downloadProduct(Order $order): BinaryFileResponse
+    public function downloadProduct(Order $order)
     {
         $user = Auth::user();
 
@@ -174,12 +196,116 @@ class BuyerDashboardController extends Controller
     }
 
     /**
-     * Get recommended products for the user based on their order history.
-     *
-     * @param \App\Models\User $user The user for whom to get recommendations.
-     * @return Collection A collection of recommended products.
+     * Show wallet management page
      */
-    private function getRecommendedProducts(\App\Models\User $user): Collection
+    public function wallet(): View
+    {
+        $user = Auth::user();
+        $wallet = $user->getOrCreateWallet();
+
+        $transactions = $user->walletTransactions()
+            ->latest()
+            ->paginate(20);
+
+        $stats = [
+            'total_funded' => $user->walletTransactions()
+                ->where('type', 'funding')
+                ->sum('amount'),
+            'total_spent' => $user->walletTransactions()
+                ->where('type', 'purchase')
+                ->sum('amount'),
+            'total_earned' => $user->walletTransactions()
+                ->where('type', 'commission')
+                ->sum('amount'),
+        ];
+
+        return view('buyer.wallet', compact('wallet', 'transactions', 'stats'));
+    }
+
+    /**
+     * Show learning center
+     */
+    public function courses(): View
+    {
+        $user = Auth::user();
+
+        // Available courses
+        $availableCourses = Course::active()
+            ->whereNotIn('id', $user->courseEnrollments()->pluck('course_id'))
+            ->paginate(12, ['*'], 'available');
+
+        // Enrolled courses
+        $enrolledCourses = $user->courseEnrollments()
+            ->with(['course', 'course.lessons'])
+            ->latest()
+            ->paginate(12, ['*'], 'enrolled');
+
+        return view('buyer.courses', compact('availableCourses', 'enrolledCourses'));
+    }
+
+    /**
+     * Show resale earnings
+     */
+    public function resale(): View
+    {
+        $user = Auth::user();
+
+        $stats = [
+            'total_earnings' => $user->walletTransactions()
+                ->where('type', 'commission')
+                ->sum('amount'),
+            'this_month_earnings' => $user->walletTransactions()
+                ->where('type', 'commission')
+                ->whereMonth('created_at', now()->month)
+                ->sum('amount'),
+            'total_referrals' => $user->orders()
+                ->whereNotNull('reseller_link_id')
+                ->count(),
+        ];
+
+        $recentEarnings = $user->walletTransactions()
+            ->where('type', 'commission')
+            ->with(['relatedOrder', 'relatedOrder.product'])
+            ->latest()
+            ->paginate(15);
+
+        return view('buyer.resale', compact('stats', 'recentEarnings'));
+    }
+
+    /**
+     * Show followed vendors
+     */
+    public function following(): View
+    {
+        $user = Auth::user();
+
+        $followedVendors = $user->followedVendors()
+            ->with(['vendor', 'vendor.shop'])
+            ->latest()
+            ->paginate(15);
+
+        return view('buyer.following', compact('followedVendors'));
+    }
+
+    /**
+     * Show certificates
+     */
+    public function certificates(): View
+    {
+        $user = Auth::user();
+
+        $certificates = $user->certificates()
+            ->with(['course'])
+            ->latest()
+            ->paginate(12);
+
+        return view('buyer.certificates', compact('certificates'));
+    }
+
+    /**
+     * Get recommended products based on user's order history
+     */
+    private function getRecommendedProducts($user): \Illuminate\Database\Eloquent\Collection
     {
         // Get product types the user has ordered
         $orderedTypes = $user->orders()
