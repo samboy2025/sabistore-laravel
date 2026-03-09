@@ -13,20 +13,21 @@ return new class extends Migration
     {
         Schema::create('certificates', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('course_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('course_id')->constrained()->onDelete('cascade');
             $table->string('certificate_number')->unique();
-            $table->string('certificate_path')->nullable(); // Generated PDF path
-            $table->timestamp('issued_at');
-            $table->timestamp('expires_at')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->json('template_data')->nullable(); // Store template customization
+            $table->string('recipient_name');
+            $table->string('course_title');
+            $table->date('completion_date');
+            $table->date('issue_date');
+            $table->string('file_path')->nullable(); // PDF file path
+            $table->boolean('is_verified')->default(true);
+            $table->json('metadata')->nullable(); // Additional certificate data
             $table->timestamps();
-            
-            // Indexes for performance
-            $table->index(['user_id', 'course_id']);
+
+            $table->unique(['user_id', 'course_id']);
             $table->index(['certificate_number']);
-            $table->index(['issued_at']);
+            $table->index(['user_id', 'issue_date']);
         });
     }
 
